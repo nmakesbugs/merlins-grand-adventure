@@ -1126,6 +1126,12 @@ class Ch1FPSScene extends Phaser.Scene {
     this._launch();
   }
   _launch(){
+    // Restore canvas and clean up FPS on any shutdown (debug nav or scene change)
+    this.events.once('shutdown',()=>{
+      this.game.canvas.style.display='block';
+      const fp=document.getElementById('fps-container');
+      if(fp)fp.remove();
+    });
     const fps=new MerlinFPS(
       ()=>{this.game.canvas.style.display='block';this._afterWin();},
       ()=>{fps.destroy();this._launch();}  // retry: relaunch
@@ -1157,9 +1163,8 @@ class StubScene extends Phaser.Scene {
     const W=this.scale.width,H=this.scale.height;
     this.cameras.main.setBackgroundColor('#0a0a12').fadeIn(400);
     this.add.sprite(W/2,H/2-50,'merlin-sit').setScale(1.45);
-    this.add.text(W/2,H/2+80,'CHAPTERS 2–5',{fontSize:'20px',color:'#D4A843',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5);
-    this.add.text(W/2,H/2+116,'COMING SOON',{fontSize:'28px',color:'#F0EAD8',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5);
-    this.add.text(W/2,H/2+162,'Merlin is resting up.\nHe is a very tired and good boy.',{fontSize:'14px',color:'#A09070',fontFamily:'Nunito,sans-serif',align:'center',lineSpacing:5}).setOrigin(0.5);
+    this.add.text(W/2,H/2+80,'DEBUG PLACEHOLDER',{fontSize:'18px',color:'#D4A843',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5);
+    this.add.text(W/2,H/2+116,'Merlin has already completed the adventure.',{fontSize:'18px',color:'#F0EAD8',fontFamily:'Nunito,sans-serif',align:'center',wordWrap:{width:320}}).setOrigin(0.5);
     const r=this.add.text(W/2,H-72,'TAP TO PLAY AGAIN',{fontSize:'16px',color:'#D4A843',fontFamily:'Fredoka One,sans-serif',letterSpacing:4}).setOrigin(0.5);
     this.tweens.add({targets:r,alpha:0.15,duration:680,yoyo:true,repeat:-1});
     this.input.once('pointerdown',()=>{this.cameras.main.fadeOut(400);this.time.delayedCall(400,()=>this.scene.start('BootScene'));});
@@ -3196,7 +3201,9 @@ window.addEventListener('load',()=>{
            StubScene]
   });
 
-  // ── DEBUG BUTTON ────────────────────────────────────────────────────────
+  // ── DEBUG BUTTON (hidden unless ?debug=1) ───────────────────────────────
+  const debugEnabled=new URLSearchParams(window.location.search).has('debug');
+  if(debugEnabled){
   const chapters=[
     {label:'Boot',          key:'BootScene'},
     {label:'Prologue',      key:'PrologueScene'},
@@ -3232,11 +3239,12 @@ window.addEventListener('load',()=>{
       menu.style.display='none';
       const fps=document.getElementById('fps-container');if(fps)fps.remove();
       document.querySelectorAll('[data-ch3btn],[data-navbtn]').forEach(el=>el.remove());
+      if(game.canvas)game.canvas.style.display='block';
       game.scene.scenes.forEach(s=>{if(s.scene.isActive()||s.scene.isPaused())s.scene.stop();});
       game.scene.start(ch.key);
     };
     menu.appendChild(b);
   });
   document.body.appendChild(menu);
-  dbgBtn.onclick=()=>{menu.style.display=menu.style.display==='none'?'flex':'none';};
+  dbgBtn.onclick=()=>{menu.style.display=menu.style.display==='none'?'flex':'none';};}
 });
