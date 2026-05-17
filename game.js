@@ -40,7 +40,33 @@ const Audio = (() => {
     gunshot() { init(); noise(0.14,1.8,900); },
     hit()     { init(); tone(200,0.1,'sawtooth',0.4); },
     snip()    { init(); tone(920,0.04,'square',0.15); },
-    fanfare() { init(); [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,0.18,'square',0.28),i*130)); }
+    fanfare() { init(); [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,0.18,'square',0.28),i*130)); },
+    beep(freq=440,dur=0.1,type='sine',vol=0.2) { try{init();tone(freq,dur,type,vol);}catch(e){} },
+    slideDown() {
+      try{ init(); resume();
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);
+        o.type='sine';
+        o.frequency.setValueAtTime(820,ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(140,ctx.currentTime+0.48);
+        g.gain.setValueAtTime(0.28,ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.48);
+        o.start();o.stop(ctx.currentTime+0.5);
+      }catch(e){}
+    },
+    modem() {
+      try{ init(); resume();
+        const seq=[880,440,660,880,330,660,440,880];
+        seq.forEach((f,i)=>{
+          const o=ctx.createOscillator(),g=ctx.createGain();
+          o.connect(g);g.connect(ctx.destination);
+          o.type='square';o.frequency.value=f;
+          const t=ctx.currentTime+i*0.09;
+          g.gain.setValueAtTime(0.08,t);g.gain.setValueAtTime(0,t+0.07);
+          o.start(t);o.stop(t+0.09);
+        });
+      }catch(e){}
+    }
   };
 })();
 
@@ -50,11 +76,11 @@ class Dialogue {
     this.scene=scene; this.active=false; this.queue=[]; this.onDone=null;
     this._full=''; this._done=false; this._timer=null;
     const W=scene.scale.width, H=scene.scale.height, PH=155;
-    this.bg  =scene.add.rectangle(0,H-PH,W,PH,0x080808,0.92).setOrigin(0,0).setDepth(200).setVisible(false);
-    this.bar =scene.add.rectangle(0,H-PH,W,3,0xD4A843).setOrigin(0,0).setDepth(201).setVisible(false);
-    this.spk =scene.add.text(18,H-PH+14,'',{fontSize:'12px',color:'#D4A843',fontFamily:'Fredoka One,sans-serif',letterSpacing:3}).setDepth(202).setVisible(false);
-    this.body=scene.add.text(18,H-PH+36,'',{fontSize:'15px',color:'#F0EAD8',fontFamily:'Nunito,sans-serif',wordWrap:{width:W-36},lineSpacing:5}).setDepth(202).setVisible(false);
-    this.hint=scene.add.text(W-16,H-16,'▶',{fontSize:'13px',color:'#D4A843'}).setOrigin(1,1).setDepth(202).setVisible(false);
+    this.bg  =scene.add.rectangle(0,H-PH,W,PH,0x080808,0.92).setOrigin(0,0).setDepth(200).setVisible(false).setScrollFactor(0);
+    this.bar =scene.add.rectangle(0,H-PH,W,3,0xD4A843).setOrigin(0,0).setDepth(201).setVisible(false).setScrollFactor(0);
+    this.spk =scene.add.text(18,H-PH+14,'',{fontSize:'12px',color:'#D4A843',fontFamily:'Fredoka One,sans-serif',letterSpacing:3}).setDepth(202).setVisible(false).setScrollFactor(0);
+    this.body=scene.add.text(18,H-PH+36,'',{fontSize:'15px',color:'#F0EAD8',fontFamily:'Nunito,sans-serif',wordWrap:{width:W-36},lineSpacing:5}).setDepth(202).setVisible(false).setScrollFactor(0);
+    this.hint=scene.add.text(W-16,H-16,'▶',{fontSize:'13px',color:'#D4A843'}).setOrigin(1,1).setDepth(202).setVisible(false).setScrollFactor(0);
     scene.tweens.add({targets:this.hint,alpha:0.15,duration:550,yoyo:true,repeat:-1});
     scene.input.on('pointerdown',()=>this._tap());
   }
@@ -568,6 +594,7 @@ class MerlinFPS {
 
   _buildDOM(){
     this.root=document.createElement('div');
+    this.root.id='fps-container';
     this.root.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:9999;touch-action:none;user-select:none;overflow:hidden;';
     document.body.appendChild(this.root);
 
@@ -1463,6 +1490,8 @@ class Ch3IntroScene extends Phaser.Scene {
 }
 
 // ── CHAPTER 3 PUZZLE SCENE (drag-and-drop) ────────────────────────────────
+
+// ── CHAPTER 3 PUZZLE SCENE — 4-step drag-and-drop ────────────────────────
 class Ch3PuzzleScene extends Phaser.Scene {
   constructor(){super('Ch3PuzzleScene');}
 
@@ -1472,147 +1501,158 @@ class Ch3PuzzleScene extends Phaser.Scene {
     this._buildClinic(W,H);
     this.merlin=this.add.sprite(W-90,H-165,'merlin-sit').setDepth(10).setScale(1.1);
     this.dlg=new Dialogue(this);
-    this.step=0;
+    // Intro dialogue finishes BEFORE any draggables appear — no input conflict
     this.dlg.show([
       {speaker:'Merlin',text:'Merlin is doing science. This is what smart dogs do.'},
       {speaker:'Merlin',text:'Step one. The machine wants a token. Merlin has a token.'},
-    ],()=>this._showStep1());
+    ],()=>this._s1_setup());
   }
 
   _buildClinic(W,H){
-    // Clean white interior
     this.add.rectangle(W/2,H/2,W,H,0xEEF3FA);
-    // Floor
     this.add.rectangle(W/2,H-65,W,130,0xDDE8F5);
     this.add.rectangle(W/2,H-127,W,4,0xCCDDEE);
-    // Ceiling strip
     this.add.rectangle(W/2,20,W,40,0xE0EAF8);
-    // Fluorescent lights
     [-1,0,1].forEach(i=>this.add.rectangle(W/2+i*130,18,100,8,0xFFFFFF,0.9));
-    // Wall art (generic medical cross)
     const cross=this.add.graphics().setDepth(2);
     cross.fillStyle(0x3355AA,0.15);
     cross.fillRect(W/2-8,80,16,50);cross.fillRect(W/2-22,93,44,24);
-    // Vending machine (left side)
     this.vend=this.add.sprite(95,H-215,'vending').setDepth(5).setScale(1.1);
-    // Counter / table (right side)
     this.add.rectangle(W-80,H-175,110,12,0xCCDDEE).setDepth(4);
     this.add.rectangle(W-80,H-164,110,80,0xDDEEFF,0.8).setDepth(3);
-    // Step indicator
-    this.stepLabel=this.add.text(W/2,52,'Step 1 of 3: Put the token in the machine',{
+    this.stepLabel=this.add.text(W/2,52,'Step 1 of 4: Put the token in the machine',{
       fontSize:'13px',color:'#334466',fontFamily:'Nunito,sans-serif',align:'center',
       backgroundColor:'#FFFFFF88',padding:{x:10,y:6}
     }).setOrigin(0.5).setDepth(20);
   }
 
-  _updateStep(txt){
-    this.stepLabel.setText(txt);
+  _toast(txt,dur=2000){
+    const W=this.scale.width,H=this.scale.height;
+    const t=this.add.text(W/2,H-175,txt,{
+      fontSize:'13px',color:'#F0EAD8',fontFamily:'Nunito,sans-serif',
+      backgroundColor:'#000000BB',padding:{x:10,y:6},align:'center',wordWrap:{width:290}
+    }).setOrigin(0.5).setDepth(220).setAlpha(0);
+    this.tweens.add({targets:t,alpha:1,duration:180,
+      onComplete:()=>this.tweens.add({targets:t,alpha:0,duration:400,delay:dur,onComplete:()=>t.destroy()})});
   }
 
-  // ── STEP 1: Token → coin slot ──────────────────────────────────────────
-  _showStep1(){
-    const W=this.scale.width,H=this.scale.height;
-    this.token=this.add.sprite(W/2+60,H-230,'token').setDepth(15).setInteractive();
-    this.token.homeX=W/2+60; this.token.homeY=H-230;
-    this.input.setDraggable(this.token);
-    // Drop zone: coin slot on vending machine (approx x=95, y=H-255)
-    this.slot=this.add.rectangle(95,H-260,40,18,0x334455,0.3).setDepth(6).setStrokeStyle(2,0x88AAFF,0.8);
-    this.add.text(95,H-248,'DROP HERE',{fontSize:'9px',color:'#88AAFF',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(20);
+  _clearDrag(){ this.input.removeAllListeners('drag'); this.input.removeAllListeners('dragend'); }
 
-    this.input.on('drag',(p,obj,dx,dy)=>{obj.x=dx;obj.y=dy;});
-    this.input.on('dragend',(p,obj)=>{
-      if(Phaser.Math.Distance.Between(obj.x,obj.y,95,H-260)<35){
-        this._step1Done();
-      } else {
-        this.tweens.add({targets:obj,x:obj.homeX,y:obj.homeY,duration:280,ease:'Back.Out'});
-      }
+  _makeDraggable(obj, dropFn){
+    this.input.setDraggable(obj);
+    this.input.on('drag',(p,o,dx,dy)=>{o.x=dx;o.y=dy;});
+    this.input.on('dragend',(p,o)=>{
+      if(o===obj){ if(!dropFn(o)) this.tweens.add({targets:o,x:o.homeX,y:o.homeY,duration:280,ease:'Back.Out'}); }
     });
   }
 
-  _step1Done(){
-    this.token.disableInteractive();
-    this.tweens.add({targets:this.token,x:95,y:this.scale.height-260,scale:0.5,alpha:0,duration:350,
-      onComplete:()=>this.token.destroy()});
-    this.slot.destroy();
-    Audio.beep(600,0.1,'sine',0.3);
-    // Machine activates — flash
+  _zone(x,y,w,h,label){
+    const r=this.add.rectangle(x,y,w,h,0x334455,0.25).setDepth(6).setStrokeStyle(2,0x88AAFF,0.9);
+    const t=this.add.text(x,y,label,{fontSize:'8px',color:'#88AAFF',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(20);
+    return {rect:r,text:t,destroy(){r.destroy();t.destroy();}};
+  }
+
+  // ── STEP 1: Token → coin slot ─────────────────────────────────────────
+  _s1_setup(){
+    const W=this.scale.width,H=this.scale.height;
+    this.stepLabel.setText('Step 1 of 4: Put the token in the machine');
+    this.token=this.add.sprite(W/2+55,H-212,'token').setDepth(15).setInteractive();
+    this.token.homeX=W/2+55; this.token.homeY=H-212;
+    this._slotZone=this._zone(95,H-262,42,18,'INSERT');
+    this._clearDrag();
+    this._makeDraggable(this.token,(obj)=>{
+      if(Phaser.Math.Distance.Between(obj.x,obj.y,95,H-262)<42){ this._s1_done(); return true; }
+      return false;
+    });
+  }
+
+  _s1_done(){
+    this._clearDrag(); this.token.disableInteractive(); this._slotZone.destroy();
+    this.tweens.add({targets:this.token,x:95,y:this.scale.height-262,scale:0.4,alpha:0,duration:280,onComplete:()=>this.token.destroy()});
+    try{Audio.beep(600,0.1,'sine',0.3);}catch(e){}
     this.cameras.main.flash(200,200,220,255);
-    // Packet drops from machine
-    this.time.delayedCall(400,()=>{
-      this.packet=this.add.sprite(95,this.scale.height-310,'packet').setDepth(15).setInteractive();
-      this.packet.homeX=95; this.packet.homeY=this.scale.height-310;
-      this.tweens.add({targets:this.packet,y:this.scale.height-240,duration:300,ease:'Bounce.Out'});
-      this.packet.homeY=this.scale.height-240;
-      this._updateStep('Step 2 of 3: Drag the packet to the tear zone');
-      this.dlg.show([{speaker:'Merlin',text:'The machine gave Merlin a packet. Merlin is going to use the packet now.'}],
-        ()=>this._showStep2());
+    this._toast("The machine accepted Merlin's money. Merlin is basically a doctor.");
+    this.time.delayedCall(550,()=>{
+      const H=this.scale.height;
+      this.packet=this.add.sprite(95,H-295,'packet').setDepth(15).setInteractive();
+      this.packet.homeX=95; this.packet.homeY=H-252;
+      this.tweens.add({targets:this.packet,y:H-252,duration:340,ease:'Bounce.Out'});
+      this.stepLabel.setText("Step 2 of 4: Bring the packet to Merlin's paw");
+      this.time.delayedCall(750,()=>this._s2_setup());
     });
   }
 
-  // ── STEP 2: Packet → tear/unpackage zone ──────────────────────────────
-  _showStep2(){
+  // ── STEP 2: Packet → Merlin's paw ────────────────────────────────────
+  _s2_setup(){
     const W=this.scale.width,H=this.scale.height;
-    this.input.removeAllListeners('drag');
-    this.input.removeAllListeners('dragend');
-    // Tear zone: counter on right
-    this.tearZone=this.add.rectangle(W-80,H-210,90,40,0x334455,0.2).setDepth(6).setStrokeStyle(2,0x88AAFF,0.8);
-    this.add.text(W-80,H-210,'TEAR HERE',{fontSize:'9px',color:'#88AAFF',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(20);
-    this.input.setDraggable(this.packet);
-    this.input.on('drag',(p,obj,dx,dy)=>{obj.x=dx;obj.y=dy;});
-    this.input.on('dragend',(p,obj)=>{
-      if(obj===this.packet&&Phaser.Math.Distance.Between(obj.x,obj.y,W-80,H-210)<50){
-        this._step2Done();
-      } else if(obj===this.packet){
-        this.tweens.add({targets:obj,x:obj.homeX,y:obj.homeY,duration:280,ease:'Back.Out'});
-      }
+    this._pawZone=this._zone(W-95,H-118,62,34,'PAW ZONE');
+    this._clearDrag();
+    this._makeDraggable(this.packet,(obj)=>{
+      if(Phaser.Math.Distance.Between(obj.x,obj.y,W-95,H-118)<46){ this._s2_done(); return true; }
+      return false;
     });
   }
 
-  _step2Done(){
-    this.packet.disableInteractive();
-    this.tearZone.destroy();
-    Audio.beep(800,0.06,'square',0.2);
-    // Packet opens — brief scale pop
-    this.tweens.add({targets:this.packet,scaleX:1.4,scaleY:0.6,duration:120,yoyo:true,
+  _s2_done(){
+    this._clearDrag(); this._pawZone.destroy();
+    const W=this.scale.width,H=this.scale.height;
+    this.tweens.add({targets:this.packet,x:W-95,y:H-118,duration:240});
+    this.packet.homeX=W-95; this.packet.homeY=H-118;
+    try{Audio.beep(480,0.08,'sine',0.22);}catch(e){}
+    this._toast("This packet is for Merlin's paw. Merlin has many credentials.");
+    this.stepLabel.setText('Step 3 of 4: Open the packet');
+    this.time.delayedCall(900,()=>this._s3_setup());
+  }
+
+  // ── STEP 3: Packet → tear zone ────────────────────────────────────────
+  _s3_setup(){
+    const W=this.scale.width,H=this.scale.height;
+    this._tearZone=this._zone(W/2+10,H-218,82,36,'TEAR OPEN');
+    this._clearDrag();
+    this._makeDraggable(this.packet,(obj)=>{
+      if(Phaser.Math.Distance.Between(obj.x,obj.y,W/2+10,H-218)<52){ this._s3_done(); return true; }
+      return false;
+    });
+  }
+
+  _s3_done(){
+    this._clearDrag(); this.packet.disableInteractive(); this._tearZone.destroy();
+    const W=this.scale.width,H=this.scale.height;
+    this.tweens.add({targets:this.packet,scaleX:1.5,scaleY:0.5,x:W/2+10,y:H-218,duration:110,yoyo:true,
       onComplete:()=>{
-        this.packet.setAlpha(0.4);
-        // Powder cloud (small circle burst)
-        const W=this.scale.width,H=this.scale.height;
-        for(let i=0;i<6;i++){
-          const p=this.add.circle(this.packet.x+Phaser.Math.Between(-20,20),this.packet.y+Phaser.Math.Between(-10,10),Phaser.Math.Between(3,8),0xFFFFFF,0.8).setDepth(16);
-          this.tweens.add({targets:p,y:p.y-Phaser.Math.Between(20,50),alpha:0,duration:600,delay:i*60,onComplete:()=>p.destroy()});
+        this.packet.setAlpha(0.3);
+        // Powder burst
+        for(let i=0;i<8;i++){
+          const p=this.add.circle(W/2+10+Phaser.Math.Between(-28,28),H-218+Phaser.Math.Between(-14,14),Phaser.Math.Between(3,10),0xFFFFFF,0.9).setDepth(16);
+          this.tweens.add({targets:p,y:p.y-Phaser.Math.Between(28,58),alpha:0,duration:680,delay:i*52,onComplete:()=>p.destroy()});
         }
-        this._updateStep('Step 3 of 3: Use the packet on Merlin');
-        this.dlg.show([{speaker:'Merlin',text:'Merlin has opened the science. Step three. Use the science.'}],
-          ()=>this._showStep3());
+        try{Audio.beep(800,0.06,'square',0.18);}catch(e){}
+        this._toast('The science is open. It smells like mistakes and clouds.');
+        // Substance sprite
+        this.substance=this.add.circle(W/2+10,H-218,15,0xAAEEFF,0.95).setDepth(15).setInteractive();
+        this.substance.homeX=W/2+10; this.substance.homeY=H-218;
+        this.tweens.add({targets:this.substance,scale:1.2,duration:580,yoyo:true,repeat:-1});
+        this.stepLabel.setText('Step 4 of 4: Give Merlin the science');
+        this.time.delayedCall(800,()=>this._s4_setup());
       }});
   }
 
-  // ── STEP 3: Packet → Merlin's face ────────────────────────────────────
-  _showStep3(){
+  // ── STEP 4: Substance → Merlin's face ────────────────────────────────
+  _s4_setup(){
     const W=this.scale.width,H=this.scale.height;
-    this.input.removeAllListeners('drag');
-    this.input.removeAllListeners('dragend');
-    this.packet.setInteractive();
-    this.input.setDraggable(this.packet);
-    // Drop zone: Merlin
-    this.merlinZone=this.add.rectangle(W-90,H-165,80,80,0x334455,0.15).setDepth(6).setStrokeStyle(2,0x88AAFF,0.8);
-    this.input.on('drag',(p,obj,dx,dy)=>{obj.x=dx;obj.y=dy;});
-    this.input.on('dragend',(p,obj)=>{
-      if(obj===this.packet&&Phaser.Math.Distance.Between(obj.x,obj.y,W-90,H-165)<60){
-        this._step3Done();
-      } else if(obj===this.packet){
-        this.tweens.add({targets:obj,x:obj.homeX,y:this.packet.homeY,duration:280,ease:'Back.Out'});
-      }
+    this._faceZone=this._zone(W-90,H-212,58,40,'FACE');
+    this._clearDrag();
+    this._makeDraggable(this.substance,(obj)=>{
+      if(Phaser.Math.Distance.Between(obj.x,obj.y,W-90,H-212)<52){ this._s4_done(); return true; }
+      return false;
     });
   }
 
-  _step3Done(){
-    this.packet.disableInteractive();
-    this.merlinZone.destroy();
-    this.input.removeAllListeners('drag');
-    this.input.removeAllListeners('dragend');
-    Audio.beep(440,0.3,'sine',0.25);
+  _s4_done(){
+    this._clearDrag(); this._faceZone.destroy();
+    this.substance.disableInteractive();
+    this.tweens.add({targets:this.substance,scale:0,alpha:0,duration:280});
+    try{Audio.beep(440,0.3,'sine',0.22);}catch(e){}
     this.cameras.main.flash(300,255,255,200);
     this.dlg.show([
       {speaker:'Merlin',text:'Oh.'},
@@ -1625,7 +1665,6 @@ class Ch3PuzzleScene extends Phaser.Scene {
   }
 }
 
-// ── CHAPTER 3 TRIP SCENE (couch balance game) ─────────────────────────────
 class Ch3TripScene extends Phaser.Scene {
   constructor(){super('Ch3TripScene');}
 
@@ -1860,6 +1899,503 @@ class Ch3TripScene extends Phaser.Scene {
         titleCard(this,'CHAPTER 4','"MERLIN REALIZES HE IS LOST"',()=>{
           this._cleanupBtns();
           this.cameras.main.fadeOut(400);
+          this.time.delayedCall(400,()=>this.scene.start('Ch4GasScene'));
+        });
+      });
+    });
+  }
+}
+
+// [INIT_REPLACED_CH4]
+
+// ── CHAPTER 4: GAS STATION SCENE ─────────────────────────────────────────
+class Ch4GasScene extends Phaser.Scene {
+  constructor(){super('Ch4GasScene');}
+
+  create(){
+    this.cameras.main.fadeIn(500);
+    const W=this.scale.width,H=this.scale.height;
+    this._buildScene(W,H);
+    this.merlin=this.add.sprite(W*0.2,H-160,'merlin-w1').setFlipX(true).setDepth(10);
+    this.dlg=new Dialogue(this);
+    this.time.delayedCall(500,()=>this._start());
+  }
+
+  _buildScene(W,H){
+    this.add.rectangle(W/2,H/2,W,H,0x06060f);
+    for(let i=0;i<38;i++) this.add.circle(Phaser.Math.Between(0,W),Phaser.Math.Between(0,H*0.38),Phaser.Math.Between(1,2),0xFFFFFF,Phaser.Math.FloatBetween(0.2,0.95));
+    // Gas station building
+    this.add.rectangle(W*0.65,H/2-55,220,240,0x252535);
+    this.add.rectangle(W*0.65,H/2-55,216,236,0x333344,0.9);
+    // Canopy over pumps
+    this.add.rectangle(W*0.28,H-195,140,12,0x3a4a5a);
+    this.add.rectangle(W*0.28,H-215,8,50,0x3a4a5a); this.add.rectangle(W*0.28+60,H-215,8,50,0x3a4a5a);
+    // Gas pumps
+    [W*0.2,W*0.36].forEach(x=>{
+      this.add.rectangle(x,H-185,22,55,0x4a5a6a).setDepth(3);
+      this.add.rectangle(x,H-205,24,8,0x5a6a7a).setDepth(3);
+      this.add.rectangle(x,H-200,12,18,0x88AACC,0.7).setDepth(4);
+    });
+    // Station sign
+    const sign=this.add.text(W*0.65,H/2-165,'BUCKY\'S 24HR\nGAS & MAPS',{fontSize:'13px',color:'#FFCC44',fontFamily:'Fredoka One,sans-serif',align:'center'}).setOrigin(0.5).setDepth(3);
+    this.tweens.add({targets:sign,alpha:0.55,duration:800,yoyo:true,repeat:-1});
+    // Windows
+    [[W*0.55,H/2-80],[W*0.75,H/2-80],[W*0.55,H/2-20],[W*0.75,H/2-20]].forEach(([x,y])=>{
+      this.add.rectangle(x,y,44,32,0x88AACC,0.6).setDepth(3);
+      this.add.rectangle(x,y,40,28,0x99BBDD,0.4).setDepth(3);
+    });
+    // Door
+    this.add.rectangle(W*0.65,H-168,36,68,0x667788).setDepth(3);
+    // Map rack inside (visible through door area)
+    this.add.rectangle(W*0.65-40,H-200,20,44,0x4a3a2a).setDepth(4);
+    this.add.text(W*0.65-40,H-222,'MAPS',{fontSize:'9px',color:'#DDBB66',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(5);
+    // Ground
+    this.add.rectangle(W/2,H-65,W,130,0x10100e);
+    // Streetlight
+    this.add.rectangle(W*0.08,H-310,4,280,0x333340);
+    this.add.circle(W*0.08,H-312,9,0xFFFFBB);
+    this.add.circle(W*0.08,H-312,50,0xFFFFBB,0.05);
+  }
+
+  _start(){
+    this.dlg.show([
+      {speaker:'Merlin',text:'Merlin knows every smell of home. This is not those smells.'},
+      {speaker:'Merlin',text:'Merlin is... where is Merlin.'},
+      {speaker:'Merlin',text:'There is a gas station. Gas stations have snacks. Also possibly maps. Both are important.'},
+    ],()=>this._enterStation());
+  }
+
+  _enterStation(){
+    const W=this.scale.width,H=this.scale.height; let f=0;
+    this.tweens.add({targets:this.merlin,x:W*0.65,duration:1400,ease:'Linear',
+      onUpdate:()=>{f++;this.merlin.setTexture(f%14<7?'merlin-w1':'merlin-w2');},
+      onComplete:()=>{ this.merlin.setTexture('merlin-sit'); this._mapGag(); }});
+  }
+
+  _mapGag(){
+    const W=this.scale.width,H=this.scale.height;
+    // Map paper unfolds
+    const paper=this.add.rectangle(W/2,H/2-30,280,190,0xF5ECD0).setDepth(12).setAlpha(0);
+    const g=this.add.graphics().setDepth(13).setAlpha(0);
+    g.lineStyle(1,0xAA8844,0.4);
+    for(let x=0;x<280;x+=28) g.lineBetween(W/2-140+x,H/2-125,W/2-140+x,H/2+65);
+    for(let y=0;y<190;y+=20) g.lineBetween(W/2-140,H/2-125+y,W/2+140,H/2-125+y);
+    const here=this.add.text(W/2+70,H/2-40,'📍 HERE\n(bad area)',{fontSize:'10px',color:'#CC3333',fontFamily:'Nunito,sans-serif',align:'center'}).setDepth(14).setAlpha(0);
+    const home=this.add.text(W/2-70,H/2+40,'🏠 HOME\n(dad smell)',{fontSize:'10px',color:'#228833',fontFamily:'Nunito,sans-serif',align:'center'}).setDepth(14).setAlpha(0);
+    const arrow=this.add.text(W/2+5,H/2-5,'↙',{fontSize:'32px',color:'#D4A843'}).setDepth(14).setAlpha(0);
+    this.tweens.add({targets:[paper,g,here,home,arrow],alpha:1,duration:450});
+
+    Audio.modem();
+    this.dlg.show([
+      {speaker:'Merlin',text:'Merlin is reading the map. This is advanced. Very few dogs read maps. Merlin is one of the few.'},
+    ],()=>{
+      this.time.delayedCall(300,()=>{ Audio.modem(); });
+      this.time.delayedCall(1400,()=>{
+        this.tweens.add({targets:[paper,g,here,home,arrow],alpha:0,duration:380});
+        this.dlg.show([
+          {speaker:'Merlin',text:'Okay. Home is South. Or it smells South. Merlin is going South.'},
+          {speaker:'Merlin',text:'Wait. Merlin smells something. He should investigate the smells before committing.'},
+        ],()=>this._smellChoice());
+      });
+    });
+  }
+
+  _smellChoice(){
+    const W=this.scale.width,H=this.scale.height;
+    this.add.text(W/2,H-310,'Which smell should Merlin follow?',{fontSize:'13px',color:'#A09070',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(20);
+    const opts=[
+      {emoji:'🌭',line1:'Hot dog smell',line2:'(very compelling)',wrong:true,txt:'Merlin followed the hot dog smell for forty feet. It led to a trash can. The trash can was not dad. Merlin is disappointed but also interested in the trash can.'},
+      {emoji:'🦝',line1:'Something chaotic',line2:'(small angry wizard?)',wrong:true,txt:'Merlin thinks this raccoon smell belongs to a small angry wizard. This is not home. Merlin respects the wizard but cannot follow.'},
+      {emoji:'🏠',line1:'Safe smell south',line2:'(dad? maybe dad?)',wrong:false,txt:'Yes. That is it. That is the smell of South. And also possibly Dad. GO. MERLIN GO.'},
+    ];
+    this._smellBtns=[];
+    opts.forEach((o,i)=>{
+      const bx=65+i*130, by=H-235;
+      const bg=this.add.rectangle(bx,by,118,72,0x1a1008,0.92).setDepth(210).setInteractive().setStrokeStyle(1,0xD4A843,0.5);
+      const em=this.add.text(bx,by-22,o.emoji,{fontSize:'24px'}).setOrigin(0.5).setDepth(211);
+      const t1=this.add.text(bx,by+6,o.line1,{fontSize:'12px',color:'#F0EAD8',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5).setDepth(211);
+      const t2=this.add.text(bx,by+22,o.line2,{fontSize:'10px',color:'#A09070',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(211);
+      bg.on('pointerover',()=>bg.setFillStyle(0x2a2010,0.95));
+      bg.on('pointerout', ()=>bg.setFillStyle(0x1a1008,0.92));
+      bg.on('pointerdown',()=>{
+        this._smellBtns.forEach(([b,e,a,c])=>{b.destroy();e.destroy();a.destroy();c.destroy();});
+        if(o.wrong){
+          this.dlg.show([{speaker:'Merlin',text:o.txt}],()=>{
+            this.dlg.show([{speaker:'Merlin',text:'Back to smelling. There are more options.'}],()=>this._smellChoice());
+          });
+        } else {
+          this.dlg.show([{speaker:'Merlin',text:o.txt}],()=>{
+            this.cameras.main.fadeOut(500);
+            this.time.delayedCall(500,()=>this.scene.start('Ch4NavScene'));
+          });
+        }
+      });
+      this._smellBtns.push([bg,em,t1,t2]);
+    });
+  }
+}
+
+// ── CHAPTER 4: TOP-DOWN NAVIGATION GAME ──────────────────────────────────
+class Ch4NavScene extends Phaser.Scene {
+  constructor(){super('Ch4NavScene');}
+
+  create(){
+    this.cameras.main.fadeIn(400);
+    this.W=390; this.H=700; this.mapH=1850;
+
+    this.mState='active'; // active | stunned | squirrel | cat | raccoon | raccoonWait | won
+    this.mSpeed=94;
+    this.keys={up:false,down:false,left:false,right:false,stop:false};
+    this._hadCarHit=false;
+    this._carPool=[];
+    this._domBtns=[];
+
+    this._buildWorld();
+    this._spawnMerlin();
+    this._placeObstacles();
+    this._buildHUD();
+    this._buildControls();
+    this._bindKeyboard();
+
+    this.cameras.main.setBounds(0,0,this.W,this.mapH);
+    this.cameras.main.startFollow(this.merlin,true,0.08,0.1);
+
+    this.dlg=new Dialogue(this);
+
+    this._carEvent=this.time.addEvent({delay:2600,repeat:-1,callback:this._spawnCar,callbackScope:this});
+    this._lastT=this.time.now;
+    this._loop=this.time.addEvent({delay:16,repeat:-1,callback:this._update,callbackScope:this});
+
+    this.time.delayedCall(800,()=>{
+      this.dlg.show([
+        {speaker:'Merlin',text:'Home is South. Merlin is going South. Cross the roads carefully. The big fast things are real.'},
+      ],()=>{});
+    });
+  }
+
+  // ── WORLD BUILD ───────────────────────────────────────────────────────
+  _buildWorld(){
+    const W=this.W, H=this.mapH;
+    const g=this.add.graphics();
+
+    g.fillStyle(0x141418);g.fillRect(0,0,W,H);
+    g.fillStyle(0x1a1a2a);g.fillRect(0,0,35,H);     // left bldg
+    g.fillStyle(0x1a1a2a);g.fillRect(355,0,35,H);   // right bldg
+    g.fillStyle(0x6a6a58);g.fillRect(35,0,110,H);   // left sidewalk
+    g.fillStyle(0x6a6a58);g.fillRect(245,0,110,H);  // right sidewalk
+    g.fillStyle(0x252520);g.fillRect(145,0,100,H);  // road
+
+    // Lane markings
+    g.fillStyle(0x888800,0.65);
+    for(let y=0;y<H;y+=52) g.fillRect(190,y,10,30);
+
+    // Crossings
+    this._crossings=[295,615,940,1265];
+    this._crossings.forEach(cy=>{
+      g.fillStyle(0x3a3a34);g.fillRect(35,cy,310,78);
+      g.fillStyle(0x555550,0.45);
+      for(let x=155;x<245;x+=17) g.fillRect(x,cy,9,78);
+      g.fillStyle(0xFFFFAA,0.35);
+      g.fillRect(35,cy,110,3);g.fillRect(245,cy,110,3);
+      g.fillRect(35,cy+75,110,3);g.fillRect(245,cy+75,110,3);
+    });
+
+    // Night band near raccoon
+    g.fillStyle(0x000010,0.5);g.fillRect(35,1070,310,200);
+
+    // Home zone glow
+    g.fillStyle(0xCC9922,0.18);g.fillRect(35,1700,310,148);
+    g.fillStyle(0xFFCC44,0.1);g.fillRect(35,1760,310,88);
+
+    // Window lights on buildings (random)
+    for(let wy=60;wy<H-60;wy+=76){
+      const on1=Math.random()>0.45, on2=Math.random()>0.45;
+      if(on1){g.fillStyle(0xFFEE88,0.7);g.fillRect(4,wy,13,18);g.fillRect(18,wy,13,18);}
+      if(on2){g.fillStyle(0xFFEE88,0.7);g.fillRect(358,wy,13,18);g.fillRect(372,wy,13,18);}
+    }
+
+    // Home street sign
+    this.add.text(195,1720,'HOME STREET',{fontSize:'17px',color:'#FFCC44',fontFamily:'Fredoka One,sans-serif',align:'center'}).setOrigin(0.5).setDepth(5);
+    this.add.text(195,1748,'(familiar smell detected)',{fontSize:'11px',color:'#DDAA00',fontFamily:'Nunito,sans-serif',align:'center'}).setOrigin(0.5).setDepth(5);
+  }
+
+  // ── MERLIN ────────────────────────────────────────────────────────────
+  _spawnMerlin(){
+    this.merlin=this.add.sprite(90,55,'merlin-sit').setScale(0.48).setDepth(10);
+  }
+
+  // ── OBSTACLES ─────────────────────────────────────────────────────────
+  _placeObstacles(){
+    const add=(x,y,emoji)=>{
+      return { x, y, sprite:this.add.text(x,y,emoji,{fontSize:'22px'}).setOrigin(0.5).setDepth(9),
+               triggered:false, done:false };
+    };
+    this.obs={
+      squirrel: add(90,490,'🐿'),
+      cat:      add(90,795,'🐱'),
+      rivaldog: add(300,1055,'🐕'),
+      raccoon:  add(90,1165,'🦝'),
+    };
+  }
+
+  // ── HUD (scrollFactor=0 = fixed to screen) ────────────────────────────
+  _buildHUD(){
+    const W=this.W,H=this.H;
+    this.capBg=this.add.rectangle(W/2,32,W-10,52,0x000000,0.82).setDepth(50).setScrollFactor(0).setVisible(false);
+    this.capTxt=this.add.text(10,8,'',{fontSize:'12px',color:'#F0EAD8',fontFamily:'Nunito,sans-serif',wordWrap:{width:W-20}}).setDepth(51).setScrollFactor(0);
+    // Progress bar
+    this.add.rectangle(W-10,H/2,6,H*0.55,0x222222,0.8).setDepth(50).setScrollFactor(0);
+    this.progDot=this.add.circle(W-10,H/2,5,0xD4A843).setDepth(51).setScrollFactor(0);
+  }
+
+  _cap(txt,dur=3800){
+    this.capBg.setVisible(true).setScrollFactor(0);
+    this.capTxt.setText(txt).setScrollFactor(0);
+    if(this._capT)clearTimeout(this._capT);
+    this._capT=setTimeout(()=>{this.capBg.setVisible(false);this.capTxt.setText('');},dur);
+  }
+
+  // ── CONTROLS ──────────────────────────────────────────────────────────
+  _buildControls(){
+    const W=this.W,H=this.H;
+    const base=`position:fixed;display:flex;align-items:center;justify-content:center;
+      color:#fff;font-size:20px;border-radius:8px;touch-action:none;width:46px;height:46px;
+      background:rgba(255,255,255,0.13);border:2px solid rgba(255,255,255,0.26);`;
+    const BY=H-152,LX=18;
+    const btn=(t,l,lbl,k)=>{
+      const b=document.createElement('div');
+      b.dataset.navbtn='1';
+      b.style.cssText=`${base}position:fixed;top:${BY+t}px;left:${LX+l}px;`;
+      b.textContent=lbl;
+      b.addEventListener('touchstart',e=>{e.preventDefault();this.keys[k]=true;},{passive:false});
+      b.addEventListener('touchend',  e=>{e.preventDefault();this.keys[k]=false;},{passive:false});
+      b.addEventListener('mousedown', ()=>this.keys[k]=true);
+      b.addEventListener('mouseup',   ()=>this.keys[k]=false);
+      document.body.appendChild(b);
+      this._domBtns.push(b);
+    };
+    btn(0, 46,'▲','up'); btn(94,46,'▼','down'); btn(47,0,'◀','left'); btn(47,92,'▶','right');
+    this.events.once('shutdown',()=>this._cleanDOM());
+    this.events.once('destroy', ()=>this._cleanDOM());
+  }
+
+  _cleanDOM(){
+    this._domBtns.forEach(b=>{if(b.parentNode)b.parentNode.removeChild(b);});
+    this._domBtns=[];
+    if(this._kd)window.removeEventListener('keydown',this._kd);
+    if(this._ku)window.removeEventListener('keyup',  this._ku);
+  }
+
+  _bindKeyboard(){
+    window.addEventListener('keydown',this._kd=e=>{
+      if(e.key==='ArrowUp'   ||e.key==='w')this.keys.up=true;
+      if(e.key==='ArrowDown' ||e.key==='s')this.keys.down=true;
+      if(e.key==='ArrowLeft' ||e.key==='a')this.keys.left=true;
+      if(e.key==='ArrowRight'||e.key==='d')this.keys.right=true;
+      if(e.key===' ')this.keys.stop=true;
+    });
+    window.addEventListener('keyup',this._ku=e=>{
+      if(e.key==='ArrowUp'   ||e.key==='w')this.keys.up=false;
+      if(e.key==='ArrowDown' ||e.key==='s')this.keys.down=false;
+      if(e.key==='ArrowLeft' ||e.key==='a')this.keys.left=false;
+      if(e.key==='ArrowRight'||e.key==='d')this.keys.right=false;
+      if(e.key===' ')this.keys.stop=false;
+    });
+  }
+
+  // ── CAR SPAWNING ──────────────────────────────────────────────────────
+  _spawnCar(){
+    if(this.mState==='won') return;
+    // Only spawn in crossing zones within camera view
+    const camY=this.cameras.main.scrollY;
+    const activeCrossing=this._crossings.find(cy=>cy>camY-100&&cy<camY+800);
+    if(!activeCrossing) return;
+    const fromLeft=Math.random()>0.5;
+    const carY=activeCrossing+Phaser.Math.Between(10,58);
+    const colors=[0xCC2200,0x0044AA,0x228800,0x996600,0x553399];
+    const car=this.add.rectangle(fromLeft?135:260,carY,55,20,colors[Math.floor(Math.random()*colors.length)]).setDepth(8);
+    const vx=fromLeft?230:-230;
+    this._carPool.push({sprite:car,vx,endX:fromLeft?265:130});
+  }
+
+  // ── MAIN LOOP ─────────────────────────────────────────────────────────
+  _update(){
+    if(this.mState==='won') return;
+    const now=this.time.now;
+    const dt=Math.min((now-this._lastT)/1000,0.05);
+    this._lastT=now;
+
+    // Move cars
+    this._carPool.forEach((c,i)=>{
+      c.sprite.x+=c.vx*dt;
+      if((c.vx>0&&c.sprite.x>c.endX+90)||(c.vx<0&&c.sprite.x<c.endX-90)){
+        c.sprite.destroy(); this._carPool.splice(i,1);
+      }
+    });
+
+    // Merlin movement (blocked during raccoon event and stunned)
+    if(this.mState==='active'||this.mState==='squirrel'||this.mState==='cat'){
+      const spd=this.mState==='cat'?36:this.mSpeed;
+      let vx=0,vy=0;
+      if(this.keys.up)   vy=-spd;
+      if(this.keys.down) vy= spd;
+      if(this.keys.left) vx=-spd;
+      if(this.keys.right)vx= spd;
+
+      // Squirrel drift (unless player holds stop)
+      if(this.mState==='squirrel'&&!this.keys.stop){
+        vx+=(90-this.merlin.x)*0.5;
+        vy-=18;
+      }
+
+      const nx=Phaser.Math.Clamp(this.merlin.x+vx*dt,36,354);
+      const ny=Phaser.Math.Clamp(this.merlin.y+vy*dt,20,this.mapH-30);
+      this.merlin.x=nx; this.merlin.y=ny;
+
+      // Car collision check (when in road zone x=145-245)
+      if(this.merlin.x>145&&this.merlin.x<245&&this.mState!=='stunned'){
+        this._carPool.forEach(c=>{
+          if(Phaser.Math.Distance.Between(this.merlin.x,this.merlin.y,c.sprite.x,c.sprite.y)<34){
+            this._carHit();
+          }
+        });
+      }
+    }
+
+    // Obstacle checks
+    this._checkObs();
+
+    // Win check
+    if(this.merlin.y>=1700&&this.mState!=='won') this._win();
+
+    // Progress dot
+    const p=Phaser.Math.Clamp((this.merlin.y-50)/(1700-50),0,1);
+    this.progDot.y=this.H/2-(p-0.5)*this.H*0.5;
+  }
+
+  // ── OBSTACLE CHECKS ───────────────────────────────────────────────────
+  _checkObs(){
+    const my=this.merlin.y;
+
+    if(!this.obs.squirrel.done&&!this.obs.squirrel.triggered&&Math.abs(my-490)<90&&this.mState==='active')
+      this._squirrelEvent();
+
+    if(!this.obs.cat.done&&!this.obs.cat.triggered&&Math.abs(my-795)<75&&this.mState==='active')
+      this._catEvent();
+
+    if(!this.obs.rivaldog.done&&my>1045&&my<1068){
+      this.obs.rivaldog.done=true;
+      this._cap('That dog is being very rude. Merlin is choosing to be the bigger dog. (Merlin is also a big dog.)');
+    }
+
+    if(!this.obs.raccoon.done&&!this.obs.raccoon.triggered&&my>1150&&this.mState==='active')
+      this._raccoonEvent();
+  }
+
+  // ── CAR HIT ───────────────────────────────────────────────────────────
+  _carHit(){
+    this.mState='stunned';
+    this.cameras.main.shake(280,0.012);
+    try{Audio.boof(0.7);}catch(e){}
+    const first=!this._hadCarHit; this._hadCarHit=true;
+    const tx=this.merlin.x<195?88:302;
+    this.tweens.add({targets:this.merlin,x:tx,duration:230,
+      onComplete:()=>{
+        this._cap(first?'THAT WAS A BIG FAST THING AND MERLIN DID NOT LIKE IT':'Merlin did not enjoy that either. Still.',first?4200:2500);
+        this.time.delayedCall(1100,()=>{this.mState='active';});
+      }});
+  }
+
+  // ── SQUIRREL ──────────────────────────────────────────────────────────
+  _squirrelEvent(){
+    this.obs.squirrel.triggered=true; this.mState='squirrel';
+    this._cap('NO. Merlin is on a mission. The squirrel can wait. THE SQUIRREL CANNOT WAIT—no. Focus.',5200);
+    // Show FOCUS button
+    const fb=document.createElement('div');
+    fb.dataset.navbtn='1'; fb.id='nav-focus-btn';
+    fb.textContent='FOCUS'; fb.style.cssText='position:fixed;bottom:185px;right:18px;padding:10px 16px;background:rgba(200,30,30,0.88);border:2px solid rgba(255,80,80,0.9);border-radius:8px;color:#fff;font-family:"Fredoka One",sans-serif;font-size:16px;cursor:pointer;touch-action:none;z-index:1001;';
+    fb.addEventListener('touchstart',e=>{e.preventDefault();this.keys.stop=true;},{passive:false});
+    fb.addEventListener('touchend',  e=>{e.preventDefault();this.keys.stop=false;},{passive:false});
+    fb.addEventListener('mousedown',()=>this.keys.stop=true);
+    fb.addEventListener('mouseup',  ()=>this.keys.stop=false);
+    document.body.appendChild(fb); this._domBtns.push(fb);
+    this.time.addEvent({delay:5200,callback:()=>{
+      this.obs.squirrel.done=true; this.obs.squirrel.sprite.destroy();
+      const focusBtn=document.getElementById('nav-focus-btn');
+      if(focusBtn)focusBtn.parentNode.removeChild(focusBtn);
+      if(this.mState==='squirrel')this.mState='active';
+    }});
+  }
+
+  // ── CAT ───────────────────────────────────────────────────────────────
+  _catEvent(){
+    this.obs.cat.triggered=true; this.mState='cat';
+    this._cap('Cat is doing the stare. Merlin does not understand the stare. It makes Merlin feel weird.',4000);
+    this.time.addEvent({delay:3200,callback:()=>{
+      this.obs.cat.done=true; this.obs.cat.sprite.destroy();
+      if(this.mState==='cat')this.mState='active';
+    }});
+  }
+
+  // ── RACCOON ───────────────────────────────────────────────────────────
+  _raccoonEvent(){
+    this.obs.raccoon.triggered=true; this.mState='raccoon';
+    this._cap('A raccoon. It is blocking the path. Merlin thinks it might be a small angry wizard.',5000);
+    this.time.delayedCall(1600,()=>this._showRaccoonChoice());
+  }
+
+  _showRaccoonChoice(){
+    const W=this.W,H=this.H;
+    this._rb1=this.add.rectangle(W/2-62,H-122,112,44,0x1a3a1a,0.94).setScrollFactor(0).setDepth(52).setInteractive().setStrokeStyle(2,0x44CC44,0.9);
+    this._rt1=this.add.text(W/2-62,H-122,'WAIT IT OUT',{fontSize:'13px',color:'#44FF44',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5).setScrollFactor(0).setDepth(53);
+    this._rb2=this.add.rectangle(W/2+72,H-122,88,44,0x3a1a1a,0.94).setScrollFactor(0).setDepth(52).setInteractive().setStrokeStyle(2,0xFF4444,0.9);
+    this._rt2=this.add.text(W/2+72,H-122,'BARK',{fontSize:'13px',color:'#FF4444',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5).setScrollFactor(0).setDepth(53);
+    this._rb1.on('pointerdown',()=>this._raccoonWait());
+    this._rb2.on('pointerdown',()=>this._raccoonBark());
+  }
+
+  _cleanRaccoon(){ [this._rb1,this._rt1,this._rb2,this._rt2].forEach(o=>{if(o)o.destroy();}); }
+
+  _raccoonWait(){
+    this._cleanRaccoon(); this.mState='raccoonWait';
+    this._cap('Merlin waits. This is extremely hard. Merlin is basically a monk right now.',4000);
+    this.time.delayedCall(3400,()=>{
+      this.obs.raccoon.done=true; this.obs.raccoon.sprite.destroy();
+      this.mState='active';
+      this._cap('The raccoon left. Merlin does not trust this but will proceed anyway.',2500);
+    });
+  }
+
+  _raccoonBark(){
+    this._cleanRaccoon();
+    try{Audio.boof(0.85);}catch(e){}
+    this._cap('Merlin barked. The raccoon did NOT appreciate this. Merlin is retreating.',3000);
+    this.mState='stunned';
+    this.tweens.add({targets:this.merlin,y:this.merlin.y-130,duration:480,ease:'Power2',
+      onComplete:()=>{
+        this.mState='active';
+        this.obs.raccoon.triggered=false; // allow retry
+        this.time.delayedCall(400,()=>this._cap('Merlin has reconsidered. The wait option may be superior.',2500));
+      }});
+  }
+
+  // ── WIN ───────────────────────────────────────────────────────────────
+  _win(){
+    this.mState='won';
+    if(this._carEvent)this._carEvent.remove();
+    if(this._loop)this._loop.remove();
+    this._cleanDOM();
+    this.cameras.main.stopFollow();
+    try{Audio.boof(1.3);}catch(e){}
+    this.time.delayedCall(350,()=>{
+      this.dlg.show([
+        {speaker:'Merlin',text:'Wait.'},
+        {speaker:'Merlin',text:'WAIT.'},
+        {speaker:'Merlin',text:'That is DAD SMELL.'},
+        {speaker:'Merlin',text:'Merlin is going HOME.'},
+      ],()=>{
+        titleCard(this,'CHAPTER 5','"MERLIN ARRIVES HOME"',()=>{
+          this.cameras.main.fadeOut(400);
           this.time.delayedCall(400,()=>this.scene.start('StubScene'));
         });
       });
@@ -1869,32 +2405,32 @@ class Ch3TripScene extends Phaser.Scene {
 
 // ── PHASER CONFIG + INIT ───────────────────────────────────────────────────
 window.addEventListener('load',()=>{
-  const game = window._mgaGame = new Phaser.Game({
-    type: Phaser.AUTO,
-    width: GW,
-    height: GH,
-    backgroundColor: '#0a0a0a',
-    scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-    parent: 'game-container',
-    scene: [BootScene, PrologueScene, Ch1IntroScene, Ch1FPSScene,
-            Ch2IntroScene, Ch2DrinkScene, Ch2DrunkScene,
-            Ch3IntroScene, Ch3PuzzleScene, Ch3TripScene,
-            StubScene]
+  const game=window._mgaGame=new Phaser.Game({
+    type:Phaser.AUTO, width:GW, height:GH, backgroundColor:'#0a0a0a',
+    scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},
+    parent:'game-container',
+    scene:[BootScene,PrologueScene,Ch1IntroScene,Ch1FPSScene,
+           Ch2IntroScene,Ch2DrinkScene,Ch2DrunkScene,
+           Ch3IntroScene,Ch3PuzzleScene,Ch3TripScene,
+           Ch4GasScene,Ch4NavScene,
+           StubScene]
   });
 
-  // ── DEBUG BUTTON (remove before release) ──────────────────────────────
+  // ── DEBUG BUTTON ────────────────────────────────────────────────────────
   const chapters=[
-    {label:'Boot',       key:'BootScene'},
-    {label:'Prologue',   key:'PrologueScene'},
-    {label:'Ch1 Intro',  key:'Ch1IntroScene'},
-    {label:'Ch1 FPS',    key:'Ch1FPSScene'},
-    {label:'Ch2 Bar',    key:'Ch2IntroScene'},
-    {label:'Ch2 Drinks', key:'Ch2DrinkScene'},
-    {label:'Ch2 Drunk',  key:'Ch2DrunkScene'},
-    {label:'Ch3 Intro',  key:'Ch3IntroScene'},
-    {label:'Ch3 Puzzle', key:'Ch3PuzzleScene'},
-    {label:'Ch3 Trip',   key:'Ch3TripScene'},
-    {label:'Ch4+ Stub',  key:'StubScene'},
+    {label:'Boot',          key:'BootScene'},
+    {label:'Prologue',      key:'PrologueScene'},
+    {label:'Ch1 Intro',     key:'Ch1IntroScene'},
+    {label:'Ch1 FPS',       key:'Ch1FPSScene'},
+    {label:'Ch2 Bar',       key:'Ch2IntroScene'},
+    {label:'Ch2 Drinks',    key:'Ch2DrinkScene'},
+    {label:'Ch2 Drunk',     key:'Ch2DrunkScene'},
+    {label:'Ch3 Intro',     key:'Ch3IntroScene'},
+    {label:'Ch3 Puzzle',    key:'Ch3PuzzleScene'},
+    {label:'Ch3 Trip',      key:'Ch3TripScene'},
+    {label:'Ch4 Lost',      key:'Ch4GasScene'},
+    {label:'Ch4 Nav',       key:'Ch4NavScene'},
+    {label:'Stub / Ch5',    key:'StubScene'},
   ];
 
   const dbgBtn=document.createElement('div');
@@ -1905,7 +2441,7 @@ window.addEventListener('load',()=>{
 
   const menu=document.createElement('div');
   menu.id='dbg-menu';
-  menu.style.cssText='position:fixed;top:44px;right:10px;z-index:99998;background:rgba(8,8,18,0.97);border:1px solid #D4A843;border-radius:8px;padding:6px;display:none;flex-direction:column;gap:3px;min-width:145px;';
+  menu.style.cssText='position:fixed;top:44px;right:10px;z-index:99998;background:rgba(8,8,18,0.97);border:1px solid #D4A843;border-radius:8px;padding:6px;display:none;flex-direction:column;gap:3px;min-width:148px;';
 
   chapters.forEach(ch=>{
     const b=document.createElement('div');
@@ -1915,20 +2451,18 @@ window.addEventListener('load',()=>{
     b.onmouseout =()=>b.style.background='rgba(255,255,255,0.05)';
     b.onclick=()=>{
       menu.style.display='none';
-      // Kill any active FPS container
+      // Kill FPS overlay
       const fps=document.getElementById('fps-container');
       if(fps)fps.remove();
-      // Kill any Ch3 DOM balance buttons
-      document.querySelectorAll('[data-ch3btn]').forEach(el=>el.remove());
-      // Stop all active scenes then start target
-      game.scene.scenes.forEach(s=>{
-        if(s.scene.isActive()||s.scene.isPaused())s.scene.stop();
-      });
+      // Kill all nav/balance DOM buttons
+      document.querySelectorAll('[data-ch3btn],[data-navbtn]').forEach(el=>el.remove());
+      // Stop all active scenes
+      game.scene.scenes.forEach(s=>{if(s.scene.isActive()||s.scene.isPaused())s.scene.stop();});
       game.scene.start(ch.key);
     };
     menu.appendChild(b);
   });
 
   document.body.appendChild(menu);
-  dbgBtn.onclick=()=>{ menu.style.display=menu.style.display==='none'?'flex':'none'; };
+  dbgBtn.onclick=()=>{menu.style.display=menu.style.display==='none'?'flex':'none';};
 });
