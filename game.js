@@ -60,7 +60,10 @@ class Dialogue {
   }
   show(lines,onDone) {
     this.queue=(Array.isArray(lines)?lines:[lines]).slice();
-    this.onDone=onDone; this.active=true; this._next();
+    this.onDone=onDone; this.active=true;
+    this._suppress=true;
+    this.scene.time.delayedCall(180,()=>{this._suppress=false;});
+    this._next();
   }
   _next() {
     if (!this.queue.length) { this._hide(); if (this.onDone) this.onDone(); return; }
@@ -79,7 +82,7 @@ class Dialogue {
     }});
   }
   _tap() {
-    if (!this.active) return;
+    if (!this.active||this._suppress) return;
     if (!this._done) { if(this._timer){this._timer.remove();this._timer=null;} this.body.setText(this._full); this._done=true; }
     else this._next();
   }
@@ -171,10 +174,10 @@ function buildTextures(scene) {
     g.fillStyle(0x5A9A48,0.35);g.fillRoundedRect(12,44,22,60,4);
     // Brown skin arms
     g.fillStyle(0xB06030,1);g.fillRoundedRect(2,42,10,44,5);g.fillRoundedRect(62,42,10,44,5);
-    // Brown skin head
-    g.fillStyle(0xB06030,1);g.fillCircle(37,26,23);
-    // Dark brown hair
-    g.fillStyle(0x2A1000,1);g.fillCircle(37,13,21);g.fillRect(14,13,46,20);
+    // Hair drawn FIRST (large circle) — head circle drawn on top creates natural hair look
+    g.fillStyle(0x2A1000,1);g.fillCircle(37,20,27);
+    // Brown skin head ON TOP — hair peeks out at top and sides
+    g.fillStyle(0xB06030,1);g.fillCircle(37,28,22);
     // Eyes (dark brown)
     g.fillStyle(0x1A0A00,1);g.fillCircle(28,27,4);g.fillCircle(46,27,4);
     g.fillStyle(0xFFFFFF,1);g.fillCircle(30,25,1.5);g.fillCircle(48,25,1.5);
@@ -871,10 +874,10 @@ class Ch2IntroScene extends Phaser.Scene {
       g.fillStyle(0x2a2a3a,1);g.fillRoundedRect(10,42,60,52,5);
       // arms
       g.fillStyle(0xC8A888,1);g.fillRoundedRect(2,44,12,45,5);g.fillRoundedRect(66,44,12,45,5);
-      // head
+      // Hair drawn FIRST (larger) then head skin circle on top
+      g.fillStyle(0x1a1000,1);g.fillCircle(40,20,28);
+      // head ON TOP — hair visible at top and sides
       g.fillStyle(0xC8A888,1);g.fillCircle(40,28,24);
-      // hair (short dark)
-      g.fillStyle(0x1a1000,1);g.fillCircle(40,14,20);g.fillRect(18,14,44,16);
       // mustache
       g.fillStyle(0x1a1000,1);g.fillEllipse(40,36,22,7);
       // eyes
@@ -1018,10 +1021,11 @@ class Ch2DrinkScene extends Phaser.Scene {
     this.correctOrder=['beer','whiskey','vodka','tequila'];
     this.currentIdx=0;
     this.dlg=new Dialogue(this);
+    // Dialogue finishes FIRST, then buttons appear — prevents input conflict
     this.dlg.show([
       {speaker:'Bartender',text:'What are you having?'},
       {speaker:'Merlin',  text:'Merlin will have... one of each. In the correct order. Merlin knows about orders.'},
-      'Choose Merlin\'s drinks in the right order.',
+      {speaker:'Merlin',  text:'Tap the drinks in the right order. This is a test of character.'},
     ],()=>this._showDrinks());
   }
 
@@ -1051,28 +1055,27 @@ class Ch2DrinkScene extends Phaser.Scene {
       {id:'tequila', label:'🍹 Tequila', color:0x887700,liquid:0xDDCC22,desc:'Lime not included'},
     ];
 
-    // Progress indicators at top
+    // Buttons positioned in UPPER half — well above dialogue panel (H-155)
+    // Row 0 center: H-390, Row 1 center: H-295
+    this.add.text(W/2,H-430,'Tap in the right order:',{fontSize:'12px',color:'#A09070',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(12);
+
+    // Progress pips
     this.pips=[];
     drinks.forEach((_,i)=>{
-      const pip=this.add.circle(W/2-45+i*30,H-250,8,0x333333).setDepth(12).setStrokeStyle(2,0x888888);
-      this.pips.push(pip);
+      this.pips.push(this.add.circle(W/2-45+i*30,H-414,7,0x333333).setDepth(12).setStrokeStyle(2,0x666666));
     });
-    this.add.text(W/2,H-268,'Drink order:',{fontSize:'12px',color:'#A09070',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(12);
 
     this._drinkBtns=[];
     drinks.forEach((d,i)=>{
       const col=i%2, row=Math.floor(i/2);
-      const bx=W/4+col*(W/2), by=H-195+row*88;
+      const bx=W/4+col*(W/2);
+      const by=H-390+row*100;   // row 0: H-390=310, row 1: H-290=410 — safely above panel
 
-      // Glass bg
-      const bg=this.add.rectangle(bx,by,W/2-24,76,0x111111,0.9).setDepth(11).setInteractive().setStrokeStyle(2,d.color,0.6);
-      // Liquid fill
-      const liq=this.add.rectangle(bx,by+12,W/2-36,38,d.liquid,0.75).setDepth(12);
-      // Foam/surface
-      if(d.id==='beer'){this.add.rectangle(bx,by-6,W/2-36,14,0xFFFFEE,0.8).setDepth(13);}
-      // Label
-      const lbl=this.add.text(bx,by-26,d.label,{fontSize:'14px',color:'#F0EAD8',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5).setDepth(13);
-      const sub=this.add.text(bx,by+28,d.desc,{fontSize:'10px',color:'#888866',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(13);
+      const bg=this.add.rectangle(bx,by,W/2-28,86,0x111111,0.92).setDepth(11).setInteractive().setStrokeStyle(2,d.color,0.6);
+      const liq=this.add.rectangle(bx,by+14,W/2-40,36,d.liquid,0.8).setDepth(12);
+      if(d.id==='beer')this.add.rectangle(bx,by-5,W/2-40,12,0xFFFFEE,0.85).setDepth(13);
+      const lbl=this.add.text(bx,by-30,d.label,{fontSize:'15px',color:'#F0EAD8',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5).setDepth(13);
+      const sub=this.add.text(bx,by+30,d.desc,{fontSize:'10px',color:'#888866',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(13);
 
       bg.on('pointerover',()=>{bg.setStrokeStyle(3,d.color,1);lbl.setColor('#D4A843');});
       bg.on('pointerout', ()=>{bg.setStrokeStyle(2,d.color,0.6);lbl.setColor('#F0EAD8');});
@@ -1084,26 +1087,32 @@ class Ch2DrinkScene extends Phaser.Scene {
 
   _onDrinkTap(id,bg,liq,lbl,idx){
     if(id===this.correctOrder[this.currentIdx]){
-      // Correct
+      // Correct — flash green, disable button, show floating toast (no dialogue conflict)
       bg.setStrokeStyle(3,0x44FF44,1);
       this.pips[this.currentIdx].setFillStyle(0xD4A843).setStrokeStyle(2,0xFFD700);
-      // Disable this button
       bg.disableInteractive();
       liq.setAlpha(0.3);
 
       const reactions=[
-        {speaker:'Merlin',text:'Oh. OH. This is what happy tastes like.'},
-        {speaker:'Merlin',text:'Spicy water. Merlin respects it.'},
-        {speaker:'Merlin',text:'Nothing. And then everything.'},
-        {speaker:'Merlin',text:'This one is a mistake and also Merlin wants another.'},
+        'Oh. OH. This is what happy tastes like.',
+        'Spicy water. Merlin respects it.',
+        'Nothing. And then everything.',
+        'This one is a mistake and Merlin wants another.',
       ];
-      this.dlg.show([reactions[this.currentIdx]],()=>{});
+      // Floating toast — no tap required, fades on its own
+      const W=this.scale.width, H=this.scale.height;
+      const toast=this.add.text(W/2,H-175,reactions[this.currentIdx],{
+        fontSize:'13px',color:'#F0EAD8',fontFamily:'Nunito,sans-serif',
+        backgroundColor:'#00000099',padding:{x:10,y:6},align:'center',wordWrap:{width:280}
+      }).setOrigin(0.5).setDepth(220).setAlpha(0);
+      this.tweens.add({targets:toast,alpha:1,duration:200,
+        onComplete:()=>this.tweens.add({targets:toast,alpha:0,duration:500,delay:1800,onComplete:()=>toast.destroy()})});
+
       this.currentIdx++;
 
       if(this.currentIdx>=4){
-        // Win — all 4 drinks done
         this._drinkBtns.forEach(b=>b.bg.disableInteractive());
-        this.time.delayedCall(800,()=>{
+        this.time.delayedCall(1200,()=>{
           this.cameras.main.fadeOut(450);
           this.time.delayedCall(450,()=>this.scene.start('Ch2DrunkScene'));
         });
