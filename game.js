@@ -162,15 +162,24 @@ function buildTextures(scene) {
     g.fillStyle(0xFFD700,1);[54,60,66,72].forEach(cx=>g.fillCircle(cx,56,2));
   });
 
-  make('mom',74,138,g=>{
-    g.fillStyle(0x4466BB,1);g.fillRoundedRect(12,92,18,36,4);g.fillRoundedRect(34,92,18,36,4);
-    g.fillStyle(0xE87878,1);g.fillRoundedRect(10,40,54,56,6);
-    g.fillStyle(0xF5C8A0,1);g.fillRoundedRect(2,42,12,42,5);g.fillRoundedRect(60,42,12,42,5);
-    g.fillStyle(0xF5C8A0,1);g.fillCircle(37,26,23);
-    g.fillStyle(0x2a1800,1);g.fillCircle(37,15,19);g.fillRect(15,15,44,16);
-    g.fillStyle(0x3a2a1a,1);g.fillCircle(28,27,4);g.fillCircle(46,27,4);
+  make('mom',74,142,g=>{
+    // Brown skin legs (visible below dress hem)
+    g.fillStyle(0xB06030,1);g.fillRoundedRect(13,110,16,28,4);g.fillRoundedRect(35,110,16,28,4);
+    // Green dress (covers to knee)
+    g.fillStyle(0x4A7A38,1);g.fillRoundedRect(8,40,58,76,6);
+    // Dress highlight
+    g.fillStyle(0x5A9A48,0.35);g.fillRoundedRect(12,44,22,60,4);
+    // Brown skin arms
+    g.fillStyle(0xB06030,1);g.fillRoundedRect(2,42,10,44,5);g.fillRoundedRect(62,42,10,44,5);
+    // Brown skin head
+    g.fillStyle(0xB06030,1);g.fillCircle(37,26,23);
+    // Dark brown hair
+    g.fillStyle(0x2A1000,1);g.fillCircle(37,13,21);g.fillRect(14,13,46,20);
+    // Eyes (dark brown)
+    g.fillStyle(0x1A0A00,1);g.fillCircle(28,27,4);g.fillCircle(46,27,4);
     g.fillStyle(0xFFFFFF,1);g.fillCircle(30,25,1.5);g.fillCircle(48,25,1.5);
-    g.lineStyle(2,0x3a2a1a,1);g.beginPath();g.arc(37,31,7,0.2,Math.PI-0.2);g.strokePath();
+    // Smile
+    g.lineStyle(2,0x1A0A00,1);g.beginPath();g.arc(37,31,7,0.2,Math.PI-0.2);g.strokePath();
   });
 
   make('clippers',62,32,g=>{
@@ -810,7 +819,7 @@ class Ch1FPSScene extends Phaser.Scene {
     ],()=>{
       titleCard(this,'CHAPTER 2','"MERLIN GOES TO THE BAR"',()=>{
         this.cameras.main.fadeOut(400);
-        this.time.delayedCall(400,()=>this.scene.start('StubScene'));
+        this.time.delayedCall(400,()=>this.scene.start('Ch2IntroScene'));
       });
     });
   }
@@ -832,6 +841,392 @@ class StubScene extends Phaser.Scene {
   }
 }
 
+// [INIT REPLACED]
+
+// ── CHAPTER 2 INTRO SCENE (Bar entrance + bartender choice) ───────────────
+class Ch2IntroScene extends Phaser.Scene {
+  constructor(){super('Ch2IntroScene');}
+  create(){
+    this.cameras.main.fadeIn(500);
+    const W=this.scale.width,H=this.scale.height;
+    this._buildBar(W,H);
+    this._makeBarTextures(W,H);
+    this.merlin=this.add.sprite(-80,H-162,'merlin-w1').setFlipX(true).setDepth(10);
+    this.dlg=new Dialogue(this);
+    this.time.delayedCall(400,()=>this._enter());
+  }
+
+  _makeBarTextures(W,H){
+    function make(scene,key,w,h,fn){const g=scene.make.graphics({x:0,y:0,add:false});fn(g);g.generateTexture(key,w,h);g.destroy();}
+    // Bartender: gruff guy in bar apron
+    make(this,'bartender',80,150,g=>{
+      // legs/shoes
+      g.fillStyle(0x111111,1);g.fillRoundedRect(14,118,18,30,4);g.fillRoundedRect(38,118,18,30,4);
+      // pants
+      g.fillStyle(0x222244,1);g.fillRoundedRect(12,82,56,42,4);
+      // white apron
+      g.fillStyle(0xF0F0F0,1);g.fillRoundedRect(16,50,48,68,3);
+      g.fillStyle(0xDDDDDD,1);g.fillRect(16,70,48,2);
+      // shirt (dark)
+      g.fillStyle(0x2a2a3a,1);g.fillRoundedRect(10,42,60,52,5);
+      // arms
+      g.fillStyle(0xC8A888,1);g.fillRoundedRect(2,44,12,45,5);g.fillRoundedRect(66,44,12,45,5);
+      // head
+      g.fillStyle(0xC8A888,1);g.fillCircle(40,28,24);
+      // hair (short dark)
+      g.fillStyle(0x1a1000,1);g.fillCircle(40,14,20);g.fillRect(18,14,44,16);
+      // mustache
+      g.fillStyle(0x1a1000,1);g.fillEllipse(40,36,22,7);
+      // eyes
+      g.fillStyle(0x2a2a2a,1);g.fillCircle(31,27,4);g.fillCircle(49,27,4);
+      g.fillStyle(0xFFFFFF,1);g.fillCircle(33,25,1.5);g.fillCircle(51,25,1.5);
+      // bow tie
+      g.fillStyle(0xCC2222,1);g.fillTriangle(32,44,40,48,32,52);g.fillTriangle(48,44,40,48,48,52);g.fillCircle(40,48,4);
+    });
+    // Lady of the night: red dress, styled up
+    make(this,'lady',80,155,g=>{
+      // heels
+      g.fillStyle(0x880000,1);g.fillRect(14,140,20,12);g.fillRect(46,140,20,12);g.fillRect(28,144,10,8);g.fillRect(60,144,10,8);
+      // red dress (body)
+      g.fillStyle(0xCC2244,1);
+      g.fillRoundedRect(12,48,56,96,5);
+      // dress shimmer
+      g.fillStyle(0xFF4466,0.3);g.fillRoundedRect(16,52,20,80,4);
+      // skin arms
+      g.fillStyle(0xE8C0A0,1);g.fillRoundedRect(2,50,12,48,5);g.fillRoundedRect(66,50,12,48,5);
+      // head
+      g.fillStyle(0xE8C0A0,1);g.fillCircle(40,28,24);
+      // hair (dark, styled up with volume)
+      g.fillStyle(0x1a0800,1);g.fillCircle(40,10,22);g.fillRect(18,10,44,22);
+      g.fillEllipse(40,4,34,16);
+      // eyes (dramatic)
+      g.fillStyle(0x1a0a0a,1);g.fillCircle(30,27,5);g.fillCircle(50,27,5);
+      g.fillStyle(0xFFFFFF,1);g.fillCircle(32,25,2);g.fillCircle(52,25,2);
+      // lips (red)
+      g.fillStyle(0xCC1133,1);g.fillEllipse(40,38,14,7);
+      // necklace
+      g.fillStyle(0xFFD700,1);g.fillRect(28,46,24,3);
+    });
+  }
+
+  _buildBar(W,H){
+    // Background: warm amber bar interior
+    this.add.rectangle(W/2,H/2,W,H,0x1a0e06);
+    // Back wall (dark wood paneling)
+    this.add.rectangle(W/2,H/2-60,W,H*0.55,0x2a1a0a);
+    // Shelf unit
+    this.add.rectangle(W/2,H/2-130,W,8,0x4a2a0a);
+    this.add.rectangle(W/2,H/2-90,W,6,0x4a2a0a);
+    // Neon sign
+    const neon=this.add.text(W/2,H/2-160,"BAR",{fontSize:'28px',color:'#FF4466',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5).setDepth(2);
+    this.tweens.add({targets:neon,alpha:0.55,duration:800,yoyo:true,repeat:-1});
+    // Bottles on shelf (decorative rects)
+    const bottles=[
+      [0x884400,10,40],[0xAA6600,8,35],[0x224488,10,38],[0x22AA44,9,32],
+      [0xAA2222,8,36],[0x884400,10,30],[0xDDDD22,8,34],[0x663388,10,38],[0x224488,9,35],[0x22AA44,10,32]
+    ];
+    bottles.forEach(([c,w,h],i)=>{
+      this.add.rectangle(28+i*(W-20)/10,H/2-118,w,h,c).setDepth(3);
+      this.add.rectangle(28+i*(W-20)/10,H/2-120,w+4,4,0x888888,0.5).setDepth(3);
+    });
+    // Bar counter (foreground) — thick dark wood slab
+    this.add.rectangle(W/2,H-88,W+10,90,0x3a2010).setDepth(8);
+    this.add.rectangle(W/2,H-128,W+10,8,0x5a3820).setDepth(8); // counter top
+    this.add.rectangle(W/2,H-126,W+10,4,0x7a5030,0.7).setDepth(9); // bar edge highlight
+    // Bar stools
+    [60,W/2,W-60].forEach(x=>{
+      this.add.rectangle(x,H-148,30,6,0x5a3820).setDepth(7);
+      this.add.rectangle(x,H-135,6,28,0x3a2010).setDepth(7);
+    });
+    // Warm ambient light pools on floor
+    this.add.ellipse(W/2,H-80,200,30,0xFFAA44,0.07).setDepth(0);
+    // Floor
+    this.add.rectangle(W/2,H-52,W,105,0x120a04).setDepth(0);
+    // Puddle of... something
+    this.add.ellipse(W/3,H-110,50,12,0xAA8822,0.4).setDepth(1);
+  }
+
+  _enter(){
+    const W=this.scale.width,H=this.scale.height; let f=0;
+    // Bartender takes position
+    this.barkeep=this.add.sprite(W/2+80,H-200,'bartender').setDepth(9).setScale(1.1);
+    this.tweens.add({targets:this.merlin,x:W/2-80,duration:1500,ease:'Linear',
+      onUpdate:()=>{f++;this.merlin.setTexture(f%14<7?'merlin-w1':'merlin-w2');},
+      onComplete:()=>{
+        this.merlin.setTexture('merlin-idle');
+        this.dlg.show([
+          {speaker:'Merlin',text:'A bar. Merlin has seen bars on TV. The Boys watch the game sometimes.'},
+          {speaker:'Merlin',text:'Merlin is going to get a drink. This is what adventure looks like.'},
+          {speaker:'Bartender',text:"We don't... serve dogs."},
+        ],()=>this._choice());
+      }});
+  }
+
+  _choice(){
+    const W=this.scale.width,H=this.scale.height;
+    // Show choice buttons
+    const opts=[
+      {label:'[Merlin sits and looks very cute]',good:true},
+      {label:'[Merlin puts paw on bar]',         good:true},
+      {label:'[Merlin lets out one loud BOOF]',  good:false},
+    ];
+    this._btns=[];
+    opts.forEach((opt,i)=>{
+      const bg=this.add.rectangle(W/2,H-320+i*64,W-40,52,0x1a1008,0.92).setDepth(210).setInteractive();
+      bg.setStrokeStyle(1,0xD4A843,0.6);
+      const txt=this.add.text(W/2,H-320+i*64,opt.label,{fontSize:'13px',color:'#F0EAD8',fontFamily:'Nunito,sans-serif',align:'center',wordWrap:{width:W-60}}).setOrigin(0.5).setDepth(211);
+      bg.on('pointerdown',()=>{
+        this._btns.forEach(([b,t])=>{b.destroy();t.destroy();});
+        if(opt.good){
+          const reaction=i===0?'...fine. One drink.':"Did that dog just— okay. Fine.";
+          this.dlg.show([
+            {speaker:'Bartender',text:reaction},
+            {speaker:'Merlin',text:'Merlin is very good at sitting. This is a known fact.'},
+          ],()=>{
+            this.cameras.main.fadeOut(400);
+            this.time.delayedCall(400,()=>this.scene.start('Ch2DrinkScene'));
+          });
+        } else {
+          Audio.boof(1.2);
+          this.cameras.main.shake(300,0.008);
+          this.dlg.show([
+            {speaker:'Bartender',text:'That is it. I am calling animal control.'},
+            {speaker:'Merlin',  text:'Merlin made a mistake.'},
+          ],()=>{
+            Audio.slideDown();
+            this.cameras.main.fadeOut(400);
+            this.time.delayedCall(400,()=>this.scene.restart());
+          });
+        }
+      });
+      bg.on('pointerover', ()=>{ bg.setFillStyle(0x2a2010,0.95); txt.setColor('#D4A843'); });
+      bg.on('pointerout',  ()=>{ bg.setFillStyle(0x1a1008,0.92); txt.setColor('#F0EAD8'); });
+      this._btns.push([bg,txt]);
+    });
+  }
+}
+
+// ── CHAPTER 2 DRINK SCENE ─────────────────────────────────────────────────
+class Ch2DrinkScene extends Phaser.Scene {
+  constructor(){super('Ch2DrinkScene');}
+  create(){
+    this.cameras.main.fadeIn(400);
+    const W=this.scale.width,H=this.scale.height;
+    this._buildBar(W,H);
+    this.merlin=this.add.sprite(W/2-80,H-162,'merlin-sit').setDepth(10).setScale(1.1);
+    // Sequence state
+    this.correctOrder=['beer','whiskey','vodka','tequila'];
+    this.currentIdx=0;
+    this.dlg=new Dialogue(this);
+    this.dlg.show([
+      {speaker:'Bartender',text:'What are you having?'},
+      {speaker:'Merlin',  text:'Merlin will have... one of each. In the correct order. Merlin knows about orders.'},
+      'Choose Merlin\'s drinks in the right order.',
+    ],()=>this._showDrinks());
+  }
+
+  _buildBar(W,H){
+    this.add.rectangle(W/2,H/2,W,H,0x1a0e06);
+    this.add.rectangle(W/2,H/2-60,W,H*0.55,0x2a1a0a);
+    this.add.rectangle(W/2,H/2-130,W,8,0x4a2a0a);
+    this.add.rectangle(W/2,H/2-90,W,6,0x4a2a0a);
+    const neon=this.add.text(W/2,H/2-160,'BAR',{fontSize:'28px',color:'#FF4466',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5).setDepth(2);
+    this.tweens.add({targets:neon,alpha:0.55,duration:800,yoyo:true,repeat:-1});
+    const bottles=[[0x884400,10,40],[0xAA6600,8,35],[0x224488,10,38],[0x22AA44,9,32],[0xAA2222,8,36],[0x884400,10,30],[0xDDDD22,8,34],[0x663388,10,38],[0x224488,9,35],[0x22AA44,10,32]];
+    bottles.forEach(([c,w,h],i)=>{this.add.rectangle(28+i*(W-20)/10,H/2-118,w,h,c).setDepth(3);});
+    this.add.rectangle(W/2,H-88,W+10,90,0x3a2010).setDepth(8);
+    this.add.rectangle(W/2,H-128,W+10,8,0x5a3820).setDepth(8);
+    this.add.rectangle(W/2,H-126,W+10,4,0x7a5030,0.7).setDepth(9);
+    this.add.rectangle(W/2,H-52,W,105,0x120a04).setDepth(0);
+    // Barkeep behind counter
+    this.add.sprite(W/2+100,H-200,'bartender').setDepth(9).setScale(1.1);
+  }
+
+  _showDrinks(){
+    const W=this.scale.width,H=this.scale.height;
+    const drinks=[
+      {id:'beer',    label:'🍺 Beer',    color:0xCC8800,liquid:0xDDAA00,desc:'Cold and golden'},
+      {id:'whiskey', label:'🥃 Whiskey', color:0x7A3800,liquid:0xAA5500,desc:'Dark and smoky'},
+      {id:'vodka',   label:'🍸 Vodka',   color:0x334466,liquid:0x99CCEE,desc:'Clear and cold'},
+      {id:'tequila', label:'🍹 Tequila', color:0x887700,liquid:0xDDCC22,desc:'Lime not included'},
+    ];
+
+    // Progress indicators at top
+    this.pips=[];
+    drinks.forEach((_,i)=>{
+      const pip=this.add.circle(W/2-45+i*30,H-250,8,0x333333).setDepth(12).setStrokeStyle(2,0x888888);
+      this.pips.push(pip);
+    });
+    this.add.text(W/2,H-268,'Drink order:',{fontSize:'12px',color:'#A09070',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(12);
+
+    this._drinkBtns=[];
+    drinks.forEach((d,i)=>{
+      const col=i%2, row=Math.floor(i/2);
+      const bx=W/4+col*(W/2), by=H-195+row*88;
+
+      // Glass bg
+      const bg=this.add.rectangle(bx,by,W/2-24,76,0x111111,0.9).setDepth(11).setInteractive().setStrokeStyle(2,d.color,0.6);
+      // Liquid fill
+      const liq=this.add.rectangle(bx,by+12,W/2-36,38,d.liquid,0.75).setDepth(12);
+      // Foam/surface
+      if(d.id==='beer'){this.add.rectangle(bx,by-6,W/2-36,14,0xFFFFEE,0.8).setDepth(13);}
+      // Label
+      const lbl=this.add.text(bx,by-26,d.label,{fontSize:'14px',color:'#F0EAD8',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5).setDepth(13);
+      const sub=this.add.text(bx,by+28,d.desc,{fontSize:'10px',color:'#888866',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(13);
+
+      bg.on('pointerover',()=>{bg.setStrokeStyle(3,d.color,1);lbl.setColor('#D4A843');});
+      bg.on('pointerout', ()=>{bg.setStrokeStyle(2,d.color,0.6);lbl.setColor('#F0EAD8');});
+      bg.on('pointerdown',()=>this._onDrinkTap(d.id,bg,liq,lbl,i));
+
+      this._drinkBtns.push({bg,liq,lbl,sub,id:d.id});
+    });
+  }
+
+  _onDrinkTap(id,bg,liq,lbl,idx){
+    if(id===this.correctOrder[this.currentIdx]){
+      // Correct
+      bg.setStrokeStyle(3,0x44FF44,1);
+      this.pips[this.currentIdx].setFillStyle(0xD4A843).setStrokeStyle(2,0xFFD700);
+      // Disable this button
+      bg.disableInteractive();
+      liq.setAlpha(0.3);
+
+      const reactions=[
+        {speaker:'Merlin',text:'Oh. OH. This is what happy tastes like.'},
+        {speaker:'Merlin',text:'Spicy water. Merlin respects it.'},
+        {speaker:'Merlin',text:'Nothing. And then everything.'},
+        {speaker:'Merlin',text:'This one is a mistake and also Merlin wants another.'},
+      ];
+      this.dlg.show([reactions[this.currentIdx]],()=>{});
+      this.currentIdx++;
+
+      if(this.currentIdx>=4){
+        // Win — all 4 drinks done
+        this._drinkBtns.forEach(b=>b.bg.disableInteractive());
+        this.time.delayedCall(800,()=>{
+          this.cameras.main.fadeOut(450);
+          this.time.delayedCall(450,()=>this.scene.start('Ch2DrunkScene'));
+        });
+      }
+    } else {
+      // Wrong — Merlin pukes
+      bg.setStrokeStyle(3,0xFF2222,1);
+      this.cameras.main.shake(400,0.015);
+      this._drinkBtns.forEach(b=>b.bg.disableInteractive());
+      Audio.slideDown();
+
+      // Green puke overlay
+      const puke=this.add.rectangle(this.scale.width/2,this.scale.height/2,this.scale.width,this.scale.height,0x22AA22,0.35).setDepth(300);
+      this.tweens.add({targets:puke,alpha:0,duration:800,delay:400,onComplete:()=>puke.destroy()});
+
+      this.dlg.show([
+        {speaker:'Merlin',text:'Merlin did the drinks in the wrong order.'},
+        {speaker:'Merlin',text:'This is deeply embarrassing. Merlin will try again.'},
+      ],()=>{
+        this.cameras.main.fadeOut(400);
+        this.time.delayedCall(400,()=>this.scene.start('Ch2IntroScene'));
+      });
+    }
+  }
+}
+
+// ── CHAPTER 2 DRUNK SCENE ─────────────────────────────────────────────────
+class Ch2DrunkScene extends Phaser.Scene {
+  constructor(){super('Ch2DrunkScene');}
+  create(){
+    this.cameras.main.fadeIn(600);
+    const W=this.scale.width,H=this.scale.height;
+    this._buildBar(W,H);
+    this.merlin=this.add.sprite(W/2-60,H-162,'merlin-happy').setDepth(10).setScale(1.1);
+    // Drunk wobble — continuous camera rotation and zoom pulse
+    this._wobble();
+    // Color haze overlay
+    this.haze=this.add.rectangle(W/2,H/2,W,H,0xAA6600,0.08).setDepth(300);
+    this.dlg=new Dialogue(this);
+    this.time.delayedCall(600,()=>this._drunkEnter());
+  }
+
+  _buildBar(W,H){
+    this.add.rectangle(W/2,H/2,W,H,0x1a0e06);
+    this.add.rectangle(W/2,H/2-60,W,H*0.55,0x2a1a0a);
+    this.add.rectangle(W/2,H/2-130,W,8,0x4a2a0a);
+    this.add.rectangle(W/2,H/2-90,W,6,0x4a2a0a);
+    const neon=this.add.text(W/2,H/2-160,'BAR',{fontSize:'28px',color:'#FF4466',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5).setDepth(2);
+    this.tweens.add({targets:neon,alpha:0.4,duration:600,yoyo:true,repeat:-1});
+    this.add.rectangle(W/2,H-88,W+10,90,0x3a2010).setDepth(8);
+    this.add.rectangle(W/2,H-128,W+10,8,0x5a3820).setDepth(8);
+    this.add.rectangle(W/2,H-126,W+10,4,0x7a5030,0.7).setDepth(9);
+    this.add.rectangle(W/2,H-52,W,105,0x120a04).setDepth(0);
+    this.add.sprite(W/2+100,H-200,'bartender').setDepth(9).setScale(1.1);
+  }
+
+  _wobble(){
+    // Oscillating camera rotation + zoom to simulate drunk
+    this._wobbleEvent=this.time.addEvent({delay:16,repeat:-1,callback:()=>{
+      const t=this.time.now;
+      this.cameras.main.setRotation(Math.sin(t/420)*0.028);
+      this.cameras.main.setZoom(1+Math.sin(t/650)*0.022);
+      // Haze pulse
+      if(this.haze)this.haze.setAlpha(0.06+Math.sin(t/800)*0.04);
+    }});
+  }
+
+  _drunkEnter(){
+    const W=this.scale.width,H=this.scale.height;
+    this.dlg.show([
+      {speaker:'Merlin',text:'Merlin feels... larger. Also smaller. Both things.'},
+      {speaker:'Merlin',text:'The bar is very nice. Everything is a little sideways. That is okay.'},
+    ],()=>{
+      // Lady enters from right
+      this.lady=this.add.sprite(W+60,H-190,'lady').setDepth(10).setScale(1.1);
+      this.tweens.add({targets:this.lady,x:W/2+100,duration:900,ease:'Power2',
+        onComplete:()=>this._ladyDialogue()});
+    });
+  }
+
+  _ladyDialogue(){
+    this.dlg.show([
+      {speaker:'Lady',  text:'Hey big boy. You want a good time?'},
+      {speaker:'Merlin',text:'A good time. YES. Merlin loves good times.'},
+      {speaker:'Merlin',text:'Is this cuddles? This feels like a cuddle offer. Merlin LOVES cuddles.'},
+      {speaker:'Lady',  text:"It'll cost you."},
+      {speaker:'Merlin',text:'Cost. Merlin does not have money. Merlin has love. And one sock at home.'},
+      {speaker:'Merlin',text:'She does not seem to want those things.'},
+      {speaker:'Merlin',text:'Merlin is leaving now. Very fast.'},
+    ],()=>this._bolt());
+  }
+
+  _bolt(){
+    const W=this.scale.width,H=this.scale.height;
+    // Stop wobble, clear rotation for the bolt animation
+    if(this._wobbleEvent)this._wobbleEvent.remove();
+    this.cameras.main.setRotation(0).setZoom(1);
+    Audio.boof(1.4);
+    this.cameras.main.shake(200,0.01);
+
+    // Merlin sprints out — exaggerated drunk sprint
+    let f=0,wobbleDir=1;
+    this.tweens.add({targets:this.merlin,x:W+100,y:H-155,duration:900,ease:'Power2',
+      onUpdate:()=>{
+        f++;
+        this.merlin.setTexture(f%8<4?'merlin-w1':'merlin-w2');
+        this.merlin.y=H-162+Math.sin(f*0.8)*12*wobbleDir;
+      },
+      onComplete:()=>{
+        this.dlg.show([
+          {speaker:'Bartender',text:"HEY! You didn't pay! And I don't have a tab system for dogs!"},
+          {speaker:'Merlin',  text:'Merlin is already outside. Merlin is very sorry. Merlin is also still moving.'},
+        ],()=>{
+          titleCard(this,'CHAPTER 3','"MERLIN TRIES KETAMINE"',()=>{
+            this.cameras.main.fadeOut(400);
+            this.time.delayedCall(400,()=>this.scene.start('StubScene'));
+          });
+        });
+      }
+    });
+  }
+}
+
 // ── PHASER CONFIG + INIT ───────────────────────────────────────────────────
 window.addEventListener('load',()=>{
   new Phaser.Game({
@@ -844,6 +1239,7 @@ window.addEventListener('load',()=>{
       autoCenter: Phaser.Scale.CENTER_BOTH
     },
     parent: 'game-container',
-    scene: [BootScene, PrologueScene, Ch1IntroScene, Ch1FPSScene, StubScene]
+    scene: [BootScene, PrologueScene, Ch1IntroScene, Ch1FPSScene,
+            Ch2IntroScene, Ch2DrinkScene, Ch2DrunkScene, StubScene]
   });
 });
