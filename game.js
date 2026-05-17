@@ -1082,7 +1082,17 @@ class Ch2DrinkScene extends Phaser.Scene {
       bg.on('pointerout', ()=>{bg.setStrokeStyle(2,d.color,0.6);lbl.setColor('#F0EAD8');});
       bg.on('pointerdown',()=>this._onDrinkTap(d.id,bg,liq,lbl,i));
 
-      this._drinkBtns.push({bg,liq,lbl,sub,id:d.id});
+      this._drinkBtns.push({bg,liq,lbl,sub,id:d.id,color:d.color});
+    });
+  }
+
+  _resetDrinks(){
+    this.currentIdx=0;
+    this.pips.forEach(p=>p.setFillStyle(0x333333).setStrokeStyle(2,0x666666));
+    this._drinkBtns.forEach(b=>{
+      b.bg.setInteractive();
+      b.bg.setStrokeStyle(2,b.color,0.6);
+      b.liq.setAlpha(0.8);
     });
   }
 
@@ -1119,21 +1129,24 @@ class Ch2DrinkScene extends Phaser.Scene {
         });
       }
     } else {
-      // Wrong order — auto-dismiss, no taps required
-      bg.setStrokeStyle(3,0xFF2222,1);
-      this.cameras.main.shake(400,0.015);
+      // Wrong order — flash Merlin red, reset buttons in-place, player tries again
       this._drinkBtns.forEach(b=>b.bg.disableInteractive());
+      this.cameras.main.shake(280,0.012);
       Audio.slideDown();
-      // Green flash
+      // Flash Merlin
+      let flashes=0;
+      const flashTimer=this.time.addEvent({delay:120,repeat:5,callback:()=>{
+        flashes++;
+        this.merlin.setTint(flashes%2===0?0xFF4444:0xFFFFFF);
+        if(flashes>=6)this.merlin.clearTint();
+      }});
+      // Brief message
       const W2=this.scale.width,H2=this.scale.height;
-      const puke=this.add.rectangle(W2/2,H2/2,W2,H2,0x22AA22,0.4).setDepth(300);
-      this.tweens.add({targets:puke,alpha:0,duration:700,delay:300,onComplete:()=>puke.destroy()});
-      // Auto-dismiss message
-      const msg=this.add.text(W2/2,H2/2,'Wrong order!\nMerlin will try again.',{fontSize:'20px',color:'#F0EAD8',fontFamily:'Fredoka One,sans-serif',align:'center',backgroundColor:'#000000CC',padding:{x:16,y:12}}).setOrigin(0.5).setDepth(301).setAlpha(0);
-      this.tweens.add({targets:msg,alpha:1,duration:250});
-      this.time.delayedCall(2400,()=>{
-        this.cameras.main.fadeOut(400);
-        this.time.delayedCall(400,()=>this.scene.start('Ch2IntroScene'));
+      const msg=this.add.text(W2/2,H2/2-10,'Wrong order!\nTry again from the start.',{fontSize:'18px',color:'#F0EAD8',fontFamily:'Fredoka One,sans-serif',align:'center',backgroundColor:'#000000BB',padding:{x:14,y:10}}).setOrigin(0.5).setDepth(302).setAlpha(0);
+      this.tweens.add({targets:msg,alpha:1,duration:200});
+      this.time.delayedCall(1800,()=>{
+        this.tweens.add({targets:msg,alpha:0,duration:200,onComplete:()=>msg.destroy()});
+        this._resetDrinks();
       });
     }
   }
@@ -1228,10 +1241,595 @@ class Ch2DrunkScene extends Phaser.Scene {
         ],()=>{
           titleCard(this,'CHAPTER 3','"MERLIN TRIES KETAMINE"',()=>{
             this.cameras.main.fadeOut(400);
-            this.time.delayedCall(400,()=>this.scene.start('StubScene'));
+            this.time.delayedCall(400,()=>this.scene.start('Ch3IntroScene'));
           });
         });
       }
+    });
+  }
+}
+
+// [INIT PLACEHOLDER]
+
+// ── CHAPTER 3 INTRO SCENE ─────────────────────────────────────────────────
+class Ch3IntroScene extends Phaser.Scene {
+  constructor(){super('Ch3IntroScene');}
+
+  create(){
+    this.cameras.main.fadeIn(500);
+    const W=this.scale.width,H=this.scale.height;
+    this._makeTextures();
+    this._buildStreet(W,H);
+    this.merlin=this.add.sprite(-80,H-160,'merlin-w1').setFlipX(true).setDepth(10);
+    this.dlg=new Dialogue(this);
+    this.time.delayedCall(400,()=>this._enter());
+  }
+
+  _makeTextures(){
+    const s=this;
+    function make(key,w,h,fn){const g=s.make.graphics({x:0,y:0,add:false});fn(g);g.generateTexture(key,w,h);g.destroy();}
+
+    // Sketchy guy — gaunt, hoodie, shifty
+    make('sketchy',72,148,g=>{
+      // Shoes
+      g.fillStyle(0x111111,1);g.fillRoundedRect(10,130,22,16,3);g.fillRoundedRect(40,130,22,16,3);
+      // Pants (dirty grey)
+      g.fillStyle(0x444440,1);g.fillRoundedRect(14,88,44,48,4);
+      // Hoodie body (dark, baggy)
+      g.fillStyle(0x222228,1);g.fillRoundedRect(8,44,56,50,5);
+      // Hoodie arms (long, droopy)
+      g.fillStyle(0x1e1e24,1);g.fillRoundedRect(0,46,12,52,5);g.fillRoundedRect(60,46,12,52,5);
+      // Hands poking out
+      g.fillStyle(0xC0A080,1);g.fillCircle(6,97,6);g.fillCircle(66,97,6);
+      // Neck
+      g.fillStyle(0xC0A080,1);g.fillRect(30,36,12,14);
+      // Head (gaunt)
+      g.fillStyle(0xC0A080,1);g.fillEllipse(36,25,34,36);
+      // Hood pulled low
+      g.fillStyle(0x1a1a20,1);g.fillEllipse(36,16,44,28);
+      g.fillEllipse(36,24,46,20);
+      // Shadowed eyes (barely visible under hood)
+      g.fillStyle(0x080808,1);g.fillRect(22,22,10,5);g.fillRect(40,22,10,5);
+      g.fillStyle(0xFF4444,0.7);g.fillCircle(27,24,3);g.fillCircle(45,24,3);
+      // Smirk
+      g.lineStyle(2,0xC0A080,1);g.beginPath();g.arc(36,34,6,0.3,Math.PI*0.8);g.strokePath();
+    });
+
+    // Ketamine clinic vending machine
+    make('vending',100,180,g=>{
+      // Cabinet
+      g.fillStyle(0xDDEEFF,1);g.fillRoundedRect(0,0,100,180,6);
+      g.fillStyle(0xBBCCDD,1);g.fillRoundedRect(3,3,94,174,5);
+      // Screen
+      g.fillStyle(0x88AACC,1);g.fillRoundedRect(10,10,80,60,4);
+      g.fillStyle(0xAADDFF,1);g.fillRoundedRect(12,12,76,56,3);
+      g.fillStyle(0x224488,1);
+      g.fillText && g.fillText('K+WELLNESS',14,38);
+      // Display text via rectangle placeholder
+      g.fillStyle(0x224488,0.8);g.fillRect(14,22,50,6);g.fillRect(14,32,38,5);g.fillRect(14,42,44,4);
+      // Coin slot
+      g.fillStyle(0x334455,1);g.fillRoundedRect(35,78,30,10,3);
+      g.fillStyle(0x111122,1);g.fillRect(44,80,12,6);
+      // Coin slot label
+      g.fillStyle(0x556677,1);g.fillRect(20,82,14,4);g.fillRect(66,82,14,4);
+      // Item grid (3x2 slots)
+      for(let r=0;r<2;r++) for(let c=0;c<3;c++){
+        g.fillStyle(0xCCDDEE,1);g.fillRoundedRect(8+c*30,96+r*36,26,32,3);
+        g.fillStyle(0xFFFFFF,0.6);g.fillRoundedRect(10+c*30,98+r*36,22,18,2);
+      }
+      // Dispense tray
+      g.fillStyle(0x8899AA,1);g.fillRoundedRect(8,168,84,10,3);
+      g.fillStyle(0x667788,1);g.fillRect(12,169,76,5);
+    });
+
+    // Token / coin
+    make('token',40,40,g=>{
+      g.fillStyle(0xCCBB00,1);g.fillCircle(20,20,18);
+      g.fillStyle(0xDDCC11,1);g.fillCircle(20,20,15);
+      g.fillStyle(0xAA9900,1);g.fillCircle(20,20,10);
+      g.fillStyle(0xDDCC11,1);g.fillRect(17,12,6,16);g.fillRect(12,17,16,6);
+    });
+
+    // Ketamine packet (small white envelope/sachet)
+    make('packet',50,30,g=>{
+      g.fillStyle(0xEEEEEE,1);g.fillRoundedRect(0,0,50,30,4);
+      g.fillStyle(0xCCCCCC,1);g.fillRect(0,14,50,2);
+      g.lineStyle(1,0xAAAAAA,0.8);g.strokeRect(2,2,46,26);
+      // "K+" label
+      g.fillStyle(0x3355AA,1);g.fillRect(8,6,34,8);
+      g.fillStyle(0xFFFFFF,0.9);g.fillRect(10,8,8,4);g.fillRect(26,8,12,4);
+      // Tear notch
+      g.fillStyle(0xDDDDDD,1);g.fillTriangle(0,0,8,0,0,8);
+    });
+
+    // Couch for balance game
+    make('couch',220,100,g=>{
+      // Frame / base
+      g.fillStyle(0x7A5A3A,1);g.fillRoundedRect(0,50,220,50,8);
+      // Cushions
+      g.fillStyle(0x9A7A5A,1);g.fillRoundedRect(4,30,102,50,6);g.fillRoundedRect(114,30,102,50,6);
+      // Cushion seam
+      g.lineStyle(2,0x7A5A3A,0.5);g.lineBetween(110,32,110,78);
+      // Top backrest
+      g.fillStyle(0x8A6A4A,1);g.fillRoundedRect(0,18,220,22,6);
+      // Armrests
+      g.fillStyle(0x6A4A2A,1);g.fillRoundedRect(0,18,24,70,5);g.fillRoundedRect(196,18,24,70,5);
+      // Legs
+      g.fillStyle(0x3A2010,1);g.fillRect(8,92,16,8);g.fillRect(196,92,16,8);
+    });
+  }
+
+  _buildStreet(W,H){
+    // Night — similar to Ch1 but different area, clinic in BG
+    this.add.rectangle(W/2,H/2,W,H,0x070710);
+    // Stars
+    for(let i=0;i<35;i++) this.add.circle(Phaser.Math.Between(0,W),Phaser.Math.Between(0,H*0.35),Phaser.Math.Between(1,2),0xFFFFFF,Phaser.Math.FloatBetween(0.2,0.9));
+    // Building behind — clean clinical white
+    this.add.rectangle(W/2,H/2-40,W*0.8,260,0xDDEEFF,0.9);
+    this.add.rectangle(W/2,H/2-40,W*0.8-4,256,0xEEF5FF,0.95);
+    // Clinic sign (neon-ish)
+    const sign=this.add.text(W/2,H/2-140,'MADISON KETAMINE\nWELLNESS CLINIC',{fontSize:'13px',color:'#88AAFF',fontFamily:'Fredoka One,sans-serif',align:'center'}).setOrigin(0.5).setDepth(3);
+    this.add.text(W/2,H/2-108,'Walk-Ins Welcome',{fontSize:'10px',color:'#AACCFF',fontFamily:'Nunito,sans-serif',align:'center'}).setOrigin(0.5).setDepth(3);
+    this.tweens.add({targets:sign,alpha:0.6,duration:900,yoyo:true,repeat:-1});
+    // Clinic door
+    this.add.rectangle(W/2,H-168,55,120,0x8899BB).setDepth(4);
+    this.add.rectangle(W/2,H-168,51,116,0xAABBDD,0.9).setDepth(5);
+    this.add.circle(W/2+20,H-168,5,0xCCDDEE).setDepth(6);
+    // Windows
+    [-90,90].forEach(ox=>{
+      this.add.rectangle(W/2+ox,H/2-80,60,70,0xAABBDD,0.8).setDepth(3);
+      this.add.rectangle(W/2+ox,H/2-80,56,66,0xBBCCEE,0.6).setDepth(3);
+    });
+    // Sidewalk
+    this.add.rectangle(W/2,H-80,W,160,0x14141C).setDepth(0);
+    this.add.rectangle(W/2,H-128,W,4,0x222230,0.8);
+    // Vending machine outside (right of door)
+    this.vendingSprite=this.add.sprite(W/2+100,H-195,'vending').setDepth(5).setScale(0.9);
+  }
+
+  _enter(){
+    const W=this.scale.width,H=this.scale.height; let f=0;
+    // Sketchy guy already leaning on wall
+    this.sketchy=this.add.sprite(W/2-60,H-175,'sketchy').setDepth(8);
+    this.tweens.add({targets:this.merlin,x:W/2-155,duration:1600,ease:'Linear',
+      onUpdate:()=>{f++;this.merlin.setTexture(f%14<7?'merlin-w1':'merlin-w2');},
+      onComplete:()=>{
+        this.merlin.setTexture('merlin-idle');
+        this.dlg.show([
+          {speaker:'Merlin',text:'Outside smells like many things. This block smells like... clean? And also something else.'},
+          {speaker:'Merlin',text:'That man is leaning in a suspicious way. Merlin finds this interesting.'},
+        ],()=>this._sketchyApproach());
+      }});
+  }
+
+  _sketchyApproach(){
+    const W=this.scale.width,H=this.scale.height;
+    this.tweens.add({targets:this.sketchy,x:W/2-100,duration:700,ease:'Power2',
+      onComplete:()=>{
+        this.dlg.show([
+          {speaker:'Sketchy Guy',text:'Hey. Dog. You look stressed.'},
+          {speaker:'Merlin',    text:'Merlin is not stressed. Merlin is on an adventure. There is a difference.'},
+          {speaker:'Sketchy Guy',text:'We got something for that. Come on in. Walk-ins welcome.'},
+          {speaker:'Merlin',    text:'This man is being so helpful. Merlin loves helpful men.'},
+          {speaker:'Merlin',    text:'Except the ones with the loud sticks. This man has no loud stick.'},
+          {speaker:'Merlin',    text:'Merlin is going in.'},
+        ],()=>this._enter2());
+      }});
+  }
+
+  _enter2(){
+    const W=this.scale.width,H=this.scale.height; let f=0;
+    // Both walk toward door
+    this.tweens.add({targets:this.merlin, x:W/2-10,duration:900,ease:'Linear',
+      onUpdate:()=>{f++;this.merlin.setTexture(f%14<7?'merlin-w1':'merlin-w2');}});
+    this.tweens.add({targets:this.sketchy,x:W/2+20,duration:900,ease:'Linear',
+      onComplete:()=>{
+        this.cameras.main.fadeOut(500);
+        this.time.delayedCall(500,()=>this.scene.start('Ch3PuzzleScene'));
+      }});
+  }
+}
+
+// ── CHAPTER 3 PUZZLE SCENE (drag-and-drop) ────────────────────────────────
+class Ch3PuzzleScene extends Phaser.Scene {
+  constructor(){super('Ch3PuzzleScene');}
+
+  create(){
+    this.cameras.main.fadeIn(450);
+    const W=this.scale.width,H=this.scale.height;
+    this._buildClinic(W,H);
+    this.merlin=this.add.sprite(W-90,H-165,'merlin-sit').setDepth(10).setScale(1.1);
+    this.dlg=new Dialogue(this);
+    this.step=0;
+    this.dlg.show([
+      {speaker:'Merlin',text:'Merlin is doing science. This is what smart dogs do.'},
+      {speaker:'Merlin',text:'Step one. The machine wants a token. Merlin has a token.'},
+    ],()=>this._showStep1());
+  }
+
+  _buildClinic(W,H){
+    // Clean white interior
+    this.add.rectangle(W/2,H/2,W,H,0xEEF3FA);
+    // Floor
+    this.add.rectangle(W/2,H-65,W,130,0xDDE8F5);
+    this.add.rectangle(W/2,H-127,W,4,0xCCDDEE);
+    // Ceiling strip
+    this.add.rectangle(W/2,20,W,40,0xE0EAF8);
+    // Fluorescent lights
+    [-1,0,1].forEach(i=>this.add.rectangle(W/2+i*130,18,100,8,0xFFFFFF,0.9));
+    // Wall art (generic medical cross)
+    const cross=this.add.graphics().setDepth(2);
+    cross.fillStyle(0x3355AA,0.15);
+    cross.fillRect(W/2-8,80,16,50);cross.fillRect(W/2-22,93,44,24);
+    // Vending machine (left side)
+    this.vend=this.add.sprite(95,H-215,'vending').setDepth(5).setScale(1.1);
+    // Counter / table (right side)
+    this.add.rectangle(W-80,H-175,110,12,0xCCDDEE).setDepth(4);
+    this.add.rectangle(W-80,H-164,110,80,0xDDEEFF,0.8).setDepth(3);
+    // Step indicator
+    this.stepLabel=this.add.text(W/2,52,'Step 1 of 3: Put the token in the machine',{
+      fontSize:'13px',color:'#334466',fontFamily:'Nunito,sans-serif',align:'center',
+      backgroundColor:'#FFFFFF88',padding:{x:10,y:6}
+    }).setOrigin(0.5).setDepth(20);
+  }
+
+  _updateStep(txt){
+    this.stepLabel.setText(txt);
+  }
+
+  // ── STEP 1: Token → coin slot ──────────────────────────────────────────
+  _showStep1(){
+    const W=this.scale.width,H=this.scale.height;
+    this.token=this.add.sprite(W/2+60,H-230,'token').setDepth(15).setInteractive();
+    this.token.homeX=W/2+60; this.token.homeY=H-230;
+    this.input.setDraggable(this.token);
+    // Drop zone: coin slot on vending machine (approx x=95, y=H-255)
+    this.slot=this.add.rectangle(95,H-260,40,18,0x334455,0.3).setDepth(6).setStrokeStyle(2,0x88AAFF,0.8);
+    this.add.text(95,H-248,'DROP HERE',{fontSize:'9px',color:'#88AAFF',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(20);
+
+    this.input.on('drag',(p,obj,dx,dy)=>{obj.x=dx;obj.y=dy;});
+    this.input.on('dragend',(p,obj)=>{
+      if(Phaser.Math.Distance.Between(obj.x,obj.y,95,H-260)<35){
+        this._step1Done();
+      } else {
+        this.tweens.add({targets:obj,x:obj.homeX,y:obj.homeY,duration:280,ease:'Back.Out'});
+      }
+    });
+  }
+
+  _step1Done(){
+    this.token.disableInteractive();
+    this.tweens.add({targets:this.token,x:95,y:this.scale.height-260,scale:0.5,alpha:0,duration:350,
+      onComplete:()=>this.token.destroy()});
+    this.slot.destroy();
+    Audio.beep(600,0.1,'sine',0.3);
+    // Machine activates — flash
+    this.cameras.main.flash(200,200,220,255);
+    // Packet drops from machine
+    this.time.delayedCall(400,()=>{
+      this.packet=this.add.sprite(95,this.scale.height-310,'packet').setDepth(15).setInteractive();
+      this.packet.homeX=95; this.packet.homeY=this.scale.height-310;
+      this.tweens.add({targets:this.packet,y:this.scale.height-240,duration:300,ease:'Bounce.Out'});
+      this.packet.homeY=this.scale.height-240;
+      this._updateStep('Step 2 of 3: Drag the packet to the tear zone');
+      this.dlg.show([{speaker:'Merlin',text:'The machine gave Merlin a packet. Merlin is going to use the packet now.'}],
+        ()=>this._showStep2());
+    });
+  }
+
+  // ── STEP 2: Packet → tear/unpackage zone ──────────────────────────────
+  _showStep2(){
+    const W=this.scale.width,H=this.scale.height;
+    this.input.removeAllListeners('drag');
+    this.input.removeAllListeners('dragend');
+    // Tear zone: counter on right
+    this.tearZone=this.add.rectangle(W-80,H-210,90,40,0x334455,0.2).setDepth(6).setStrokeStyle(2,0x88AAFF,0.8);
+    this.add.text(W-80,H-210,'TEAR HERE',{fontSize:'9px',color:'#88AAFF',fontFamily:'Nunito,sans-serif'}).setOrigin(0.5).setDepth(20);
+    this.input.setDraggable(this.packet);
+    this.input.on('drag',(p,obj,dx,dy)=>{obj.x=dx;obj.y=dy;});
+    this.input.on('dragend',(p,obj)=>{
+      if(obj===this.packet&&Phaser.Math.Distance.Between(obj.x,obj.y,W-80,H-210)<50){
+        this._step2Done();
+      } else if(obj===this.packet){
+        this.tweens.add({targets:obj,x:obj.homeX,y:obj.homeY,duration:280,ease:'Back.Out'});
+      }
+    });
+  }
+
+  _step2Done(){
+    this.packet.disableInteractive();
+    this.tearZone.destroy();
+    Audio.beep(800,0.06,'square',0.2);
+    // Packet opens — brief scale pop
+    this.tweens.add({targets:this.packet,scaleX:1.4,scaleY:0.6,duration:120,yoyo:true,
+      onComplete:()=>{
+        this.packet.setAlpha(0.4);
+        // Powder cloud (small circle burst)
+        const W=this.scale.width,H=this.scale.height;
+        for(let i=0;i<6;i++){
+          const p=this.add.circle(this.packet.x+Phaser.Math.Between(-20,20),this.packet.y+Phaser.Math.Between(-10,10),Phaser.Math.Between(3,8),0xFFFFFF,0.8).setDepth(16);
+          this.tweens.add({targets:p,y:p.y-Phaser.Math.Between(20,50),alpha:0,duration:600,delay:i*60,onComplete:()=>p.destroy()});
+        }
+        this._updateStep('Step 3 of 3: Use the packet on Merlin');
+        this.dlg.show([{speaker:'Merlin',text:'Merlin has opened the science. Step three. Use the science.'}],
+          ()=>this._showStep3());
+      }});
+  }
+
+  // ── STEP 3: Packet → Merlin's face ────────────────────────────────────
+  _showStep3(){
+    const W=this.scale.width,H=this.scale.height;
+    this.input.removeAllListeners('drag');
+    this.input.removeAllListeners('dragend');
+    this.packet.setInteractive();
+    this.input.setDraggable(this.packet);
+    // Drop zone: Merlin
+    this.merlinZone=this.add.rectangle(W-90,H-165,80,80,0x334455,0.15).setDepth(6).setStrokeStyle(2,0x88AAFF,0.8);
+    this.input.on('drag',(p,obj,dx,dy)=>{obj.x=dx;obj.y=dy;});
+    this.input.on('dragend',(p,obj)=>{
+      if(obj===this.packet&&Phaser.Math.Distance.Between(obj.x,obj.y,W-90,H-165)<60){
+        this._step3Done();
+      } else if(obj===this.packet){
+        this.tweens.add({targets:obj,x:obj.homeX,y:this.packet.homeY,duration:280,ease:'Back.Out'});
+      }
+    });
+  }
+
+  _step3Done(){
+    this.packet.disableInteractive();
+    this.merlinZone.destroy();
+    this.input.removeAllListeners('drag');
+    this.input.removeAllListeners('dragend');
+    Audio.beep(440,0.3,'sine',0.25);
+    this.cameras.main.flash(300,255,255,200);
+    this.dlg.show([
+      {speaker:'Merlin',text:'Oh.'},
+      {speaker:'Merlin',text:'OH.'},
+      {speaker:'Merlin',text:'The floor is very interesting. Also the ceiling. They are the same.'},
+    ],()=>{
+      this.cameras.main.fadeOut(600);
+      this.time.delayedCall(600,()=>this.scene.start('Ch3TripScene'));
+    });
+  }
+}
+
+// ── CHAPTER 3 TRIP SCENE (couch balance game) ─────────────────────────────
+class Ch3TripScene extends Phaser.Scene {
+  constructor(){super('Ch3TripScene');}
+
+  create(){
+    this.cameras.main.fadeIn(800);
+    const W=this.scale.width,H=this.scale.height;
+    this.W=W; this.H=H;
+    this._buildRoom(W,H);
+    // Couch positioned center-lower screen
+    this.couchY=H-200;
+    this.couch=this.add.sprite(W/2,this.couchY,'couch').setDepth(8).setScale(1.3);
+    this.merlin=this.add.sprite(W/2,this.couchY-68,'merlin-sit').setDepth(9).setScale(1.0);
+    this.dlg=new Dialogue(this);
+    // Pre-trip dialogue
+    this.time.delayedCall(600,()=>{
+      this.dlg.show([
+        {speaker:'Merlin',text:'Merlin is on the couch now. This is familiar. Merlin likes couches.'},
+        {speaker:'Merlin',text:'Wait. The couch is very soft. More soft than normal soft.'},
+        {speaker:'Merlin',text:'The couch is... moving? The couch is ALIVE.'},
+        {speaker:'Merlin',text:'Merlin and the couch are friends now. Best friends.'},
+        {speaker:'Merlin',text:'Is dad here? Dad smells like safe. Merlin misses dad.'},
+      ],()=>this._startGame());
+    });
+  }
+
+  _buildRoom(W,H){
+    // Starts normal, will get weird during game
+    this.bgRect=this.add.rectangle(W/2,H/2,W,H,0x1a1008);
+    // Floor
+    this.add.rectangle(W/2,H-50,W,100,0x120a04).setDepth(1);
+    // Wall
+    this.wallRect=this.add.rectangle(W/2,H/2-60,W,H*0.6,0x1e1408).setDepth(0);
+    // Floating elements (will animate during trip)
+    this.floaters=[];
+    const floatItems=['🦴','⭐','🐾','🦴','⭐','🐾'];
+    floatItems.forEach((emoji,i)=>{
+      const f=this.add.text(
+        Phaser.Math.Between(30,W-30),
+        Phaser.Math.Between(50,H/2),
+        emoji,{fontSize:'24px'}
+      ).setDepth(5).setAlpha(0);
+      this.floaters.push(f);
+    });
+    // Dad face in clouds (text placeholder)
+    this.dadFace=this.add.text(W/2,H/4,'"DAD?"',{fontSize:'28px',color:'#FFD700',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5).setDepth(6).setAlpha(0);
+  }
+
+  _startGame(){
+    const W=this.W,H=this.H;
+    // Hide dialogue during game
+    this._playBgColors=true;
+    this._bgHue=0;
+
+    // Balance game state
+    this.merlinOffset=0;   // how far Merlin is from center (-1 to 1)
+    this.tiltAngle=0;      // couch tilt in radians
+    this.gameRunning=true;
+    this.surviveTimer=20;  // seconds to survive
+    this.survived=false;
+    this._keys={left:false,right:false};
+
+    // Show timer
+    this.timerText=this.add.text(W/2,28,'Stay on the couch: 20s',{
+      fontSize:'16px',color:'#D4A843',fontFamily:'Fredoka One,sans-serif'
+    }).setOrigin(0.5).setDepth(20);
+
+    // Show instructions briefly
+    const inst=this.add.text(W/2,H/2-20,'Keep Merlin on the couch!',{
+      fontSize:'18px',color:'#F0EAD8',fontFamily:'Fredoka One,sans-serif',
+      backgroundColor:'#000000AA',padding:{x:12,y:8}
+    }).setOrigin(0.5).setDepth(21);
+    this.tweens.add({targets:inst,alpha:0,duration:400,delay:2000,onComplete:()=>inst.destroy()});
+
+    // Animate floaters
+    this.floaters.forEach((f,i)=>{
+      this.tweens.add({targets:f,alpha:0.7,y:f.y-30,duration:1500+i*300,
+        yoyo:true,repeat:-1,ease:'Sine.easeInOut',delay:i*200});
+    });
+    // Dad face pulses in and out
+    this.tweens.add({targets:this.dadFace,alpha:0.6,duration:3000,yoyo:true,repeat:-1,delay:4000});
+
+    // Controls
+    this._buildBalanceControls();
+
+    // Update loop via time event
+    this._lastUpdate=this.time.now;
+    this._gameEvent=this.time.addEvent({delay:16,repeat:-1,callback:this._updateGame,callbackScope:this});
+  }
+
+  _buildBalanceControls(){
+    const W=this.W,H=this.H;
+    const btnStyle='position:absolute;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;border-radius:50%;touch-action:none;background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.25);width:80px;height:80px;';
+    // These are DOM buttons since they need to coexist with Phaser
+    const gameCanvas=this.game.canvas;
+    const rect=gameCanvas.getBoundingClientRect();
+    const scaleX=rect.width/this.game.config.width;
+    const scaleY=rect.height/this.game.config.height;
+
+    this._domBtns=[];
+    const makeBtn=(label,x,y,key)=>{
+      const b=document.createElement('div');
+      b.style.cssText=`${btnStyle}position:fixed;left:${rect.left+x*scaleX}px;top:${rect.top+y*scaleY}px;`;
+      b.textContent=label;
+      b.addEventListener('touchstart',e=>{e.preventDefault();this._keys[key]=true;},{passive:false});
+      b.addEventListener('touchend',  e=>{e.preventDefault();this._keys[key]=false;},{passive:false});
+      b.addEventListener('mousedown', ()=>this._keys[key]=true);
+      b.addEventListener('mouseup',   ()=>this._keys[key]=false);
+      document.body.appendChild(b);
+      this._domBtns.push(b);
+    };
+    makeBtn('◀',20,H-110,'left');
+    makeBtn('▶',W-100,H-110,'right');
+    this.events.once('shutdown',()=>this._cleanupBtns());
+    this.events.once('destroy', ()=>this._cleanupBtns());
+  }
+
+  _cleanupBtns(){
+    if(this._domBtns){
+      this._domBtns.forEach(b=>{if(b.parentNode)b.parentNode.removeChild(b);});
+      this._domBtns=[];
+    }
+  }
+
+  _updateGame(){
+    if(!this.gameRunning)return;
+    const now=this.time.now;
+    const dt=Math.min((now-this._lastUpdate)/1000,0.05);
+    this._lastUpdate=now;
+
+    // Automatic couch sway (increases over time)
+    const elapsed=20-this.surviveTimer;
+    const swaySpeed=0.8+elapsed*0.06;
+    const swayAmp=0.18+elapsed*0.008;
+    this.tiltAngle=Math.sin(now/1000*swaySpeed)*swayAmp;
+
+    // Player input counters the sway
+    if(this._keys.left) this.merlinOffset=Math.max(-1,this.merlinOffset-dt*1.2);
+    if(this._keys.right)this.merlinOffset=Math.min(1, this.merlinOffset+dt*1.2);
+
+    // Physics: Merlin slides toward downhill side
+    this.merlinOffset+=this.tiltAngle*dt*2.2;
+    this.merlinOffset=Phaser.Math.Clamp(this.merlinOffset,-1.2,1.2);
+
+    // Apply couch tilt visually
+    this.couch.setRotation(this.tiltAngle);
+    // Merlin position follows couch surface
+    const couchHalfW=130;
+    this.merlin.setRotation(this.tiltAngle);
+    this.merlin.x=this.W/2+this.merlinOffset*couchHalfW*Math.cos(this.tiltAngle);
+    this.merlin.y=this.couchY-68+this.merlinOffset*couchHalfW*Math.sin(this.tiltAngle);
+
+    // Psychedelic background color cycling
+    if(this._playBgColors){
+      this._bgHue=(this._bgHue+dt*40)%360;
+      const h=this._bgHue;
+      // Simple hue-to-RGB approximation
+      const r=Math.floor(Math.sin(h*Math.PI/180)*80+80);
+      const g=Math.floor(Math.sin((h+120)*Math.PI/180)*60+60);
+      const b2=Math.floor(Math.sin((h+240)*Math.PI/180)*80+40);
+      this.bgRect.setFillStyle(Phaser.Display.Color.GetColor(r,g,b2));
+    }
+
+    // Countdown timer
+    this.surviveTimer-=dt;
+    if(this.surviveTimer>0){
+      this.timerText.setText(`Stay on the couch: ${Math.ceil(this.surviveTimer)}s`);
+    }
+
+    // Fall off?
+    if(Math.abs(this.merlinOffset)>=1.1){
+      this.gameRunning=false;
+      this._fall();
+      return;
+    }
+
+    // Win?
+    if(this.surviveTimer<=0){
+      this.gameRunning=false;
+      this._win();
+    }
+  }
+
+  _fall(){
+    if(this._gameEvent){this._gameEvent.remove();this._gameEvent=null;}
+    this._cleanupBtns();
+    Audio.slideDown();
+    this.cameras.main.shake(300,0.015);
+    this.tweens.add({targets:this.merlin,y:this.merlin.y+120,rotation:Math.PI/2,alpha:0,duration:500,
+      onComplete:()=>{
+        // Reset Merlin on couch, try again
+        this.merlin.setPosition(this.W/2,this.couchY-68).setRotation(0).setAlpha(1);
+        this.couch.setRotation(0);
+        this.merlinOffset=0; this.tiltAngle=0;
+        this.survived=false;
+        const msg=this.add.text(this.W/2,this.H/2,'Merlin rolled off!\nTrying again...',{
+          fontSize:'18px',color:'#F0EAD8',fontFamily:'Fredoka One,sans-serif',align:'center',
+          backgroundColor:'#000000BB',padding:{x:14,y:10}
+        }).setOrigin(0.5).setDepth(25);
+        this.time.delayedCall(1800,()=>{
+          this.tweens.add({targets:msg,alpha:0,duration:300,onComplete:()=>{
+            msg.destroy();
+            // Restart balance
+            this.surviveTimer=20;
+            this.gameRunning=true;
+            this._lastUpdate=this.time.now;
+            this._buildBalanceControls();
+            this._gameEvent=this.time.addEvent({delay:16,repeat:-1,callback:this._updateGame,callbackScope:this});
+          }});
+        });
+      }
+    });
+  }
+
+  _win(){
+    if(this._gameEvent){this._gameEvent.remove();this._gameEvent=null;}
+    this._cleanupBtns();
+    this._playBgColors=false;
+    this.bgRect.setFillStyle(0x1a1008);
+    this.couch.setRotation(0);
+    this.merlin.setPosition(this.W/2,this.couchY-68).setRotation(0);
+    this.timerText.destroy();
+    Audio.fanfare();
+    // Post-trip dialogue
+    this.time.delayedCall(500,()=>{
+      this.dlg.show([
+        {speaker:'Merlin',text:'Merlin is okay. The couch was a good friend.'},
+        {speaker:'Merlin',text:'The K is done now. Merlin remembers everything and also nothing.'},
+        {speaker:'Merlin',text:'He thinks he saw dad\'s face in the sky. That is probably normal.'},
+        {speaker:'Merlin',text:'Adventure is very much.'},
+      ],()=>{
+        titleCard(this,'CHAPTER 4','"MERLIN REALIZES HE IS LOST"',()=>{
+          this._cleanupBtns();
+          this.cameras.main.fadeOut(400);
+          this.time.delayedCall(400,()=>this.scene.start('StubScene'));
+        });
+      });
     });
   }
 }
@@ -1243,12 +1841,11 @@ window.addEventListener('load',()=>{
     width: GW,
     height: GH,
     backgroundColor: '#0a0a0a',
-    scale: {
-      mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH
-    },
+    scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     parent: 'game-container',
     scene: [BootScene, PrologueScene, Ch1IntroScene, Ch1FPSScene,
-            Ch2IntroScene, Ch2DrinkScene, Ch2DrunkScene, StubScene]
+            Ch2IntroScene, Ch2DrinkScene, Ch2DrunkScene,
+            Ch3IntroScene, Ch3PuzzleScene, Ch3TripScene,
+            StubScene]
   });
 });
