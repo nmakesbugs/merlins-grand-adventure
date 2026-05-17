@@ -332,7 +332,7 @@ function buildTextures(scene) {
     // Short sleeves
     g.fillStyle(0x0e0e0e,1);g.fillRoundedRect(2,48,13,28,5);g.fillRoundedRect(67,48,13,28,5);
     // Skin forearms
-    g.fillStyle(0xB87848,1);g.fillRoundedRect(3,74,11,24,4);g.fillRoundedRect(68,74,11,24,4);
+    g.fillStyle(0xF5D5B0,1);g.fillRoundedRect(3,74,11,24,4);g.fillRoundedRect(68,74,11,24,4);
     // Phone in right hand
     g.fillStyle(0x111111,1);g.fillRoundedRect(69,68,10,18,2);
     g.fillStyle(0x224466,0.8);g.fillRect(70,70,8,14);
@@ -340,7 +340,7 @@ function buildTextures(scene) {
     g.fillStyle(0x222222,1);g.fillCircle(41,22,24);
     g.fillStyle(0x888888,0.38);g.fillCircle(34,16,10);g.fillCircle(48,16,9);g.fillCircle(41,12,8);
     // Head
-    g.fillStyle(0xB87848,1);g.fillCircle(41,34,22);
+    g.fillStyle(0xF5D5B0,1);g.fillCircle(41,34,22);
     // Stressed brow
     g.fillStyle(0x222222,0.6);g.fillRect(31,26,8,3);g.fillRect(44,26,8,3);
     // Eyes (stressed, slightly narrowed)
@@ -359,13 +359,13 @@ function buildTextures(scene) {
     // Shirt (green tee)
     g.fillStyle(0x3a6632,1);g.fillRoundedRect(8,44,42,50,5);
     // Thin arms (one forward one back — running)
-    g.fillStyle(0xB87848,1);
+    g.fillStyle(0xF5D5B0,1);
     g.fillRoundedRect(1,46,10,36,4);   // left arm forward
     g.fillRoundedRect(48,50,10,32,4);  // right arm back
     // Hair (dark brown, close crop)
     g.fillStyle(0x2a1200,1);g.fillCircle(29,18,20);
     // Thin face
-    g.fillStyle(0xB87848,1);g.fillEllipse(29,30,30,36);
+    g.fillStyle(0xF5D5B0,1);g.fillEllipse(29,30,30,36);
     // Eyes (wide, looking for dog)
     g.fillStyle(0x1a0a00,1);g.fillCircle(22,29,4);g.fillCircle(36,29,4);
     g.fillStyle(0xFFFFFF,1);g.fillCircle(24,27,1.5);g.fillCircle(38,27,1.5);
@@ -383,13 +383,13 @@ function buildTextures(scene) {
     // Hoodie (purple)
     g.fillStyle(0x5a3a8a,1);g.fillRoundedRect(10,38,46,44,6);
     // Slightly wider arms
-    g.fillStyle(0xB87848,1);g.fillRoundedRect(2,40,11,36,4);g.fillRoundedRect(53,40,11,36,4);
+    g.fillStyle(0xF5D5B0,1);g.fillRoundedRect(2,40,11,36,4);g.fillRoundedRect(53,40,11,36,4);
     // Hands up (looking out window pose — one hand on glass)
-    g.fillStyle(0xB87848,1);g.fillCircle(64,56,7);
+    g.fillStyle(0xF5D5B0,1);g.fillCircle(64,56,7);
     // Hair (brown, side part)
     g.fillStyle(0x2a1200,1);g.fillCircle(33,17,20);g.fillRect(14,17,40,12);
     // Head (slightly rounder)
-    g.fillStyle(0xB87848,1);g.fillCircle(33,28,20);
+    g.fillStyle(0xF5D5B0,1);g.fillCircle(33,28,20);
     // GLASSES — key detail
     g.lineStyle(2.5,0x111111,1);
     g.strokeRect(19,22,14,12);g.strokeRect(35,22,14,12);
@@ -412,7 +412,7 @@ function buildTextures(scene) {
     // Bright red shirt
     g.fillStyle(0xCC3322,1);g.fillRoundedRect(8,34,46,42,6);
     // Chubby arms
-    g.fillStyle(0xB87848,1);g.fillRoundedRect(1,36,10,32,4);g.fillRoundedRect(51,36,10,32,4);
+    g.fillStyle(0xF5D5B0,1);g.fillRoundedRect(1,36,10,32,4);g.fillRoundedRect(51,36,10,32,4);
     // Treat bag in left hand (shaking it)
     g.fillStyle(0xDDAA33,1);g.fillRoundedRect(0,56,16,22,4);
     g.fillStyle(0xCC8822,1);g.fillRect(1,62,14,2);
@@ -420,7 +420,7 @@ function buildTextures(scene) {
     // Hair (short messy brown)
     g.fillStyle(0x2a1200,1);g.fillCircle(31,14,18);g.fillEllipse(31,8,30,14);
     // Round little kid head
-    g.fillStyle(0xB87848,1);g.fillCircle(31,24,20);
+    g.fillStyle(0xF5D5B0,1);g.fillCircle(31,24,20);
     // BIG SMILE — defining feature
     g.fillStyle(0x1a0a00,1);g.fillCircle(24,22,4);g.fillCircle(38,22,4);
     g.fillStyle(0xFFFFFF,1);g.fillCircle(26,20,1.5);g.fillCircle(40,20,1.5);
@@ -497,32 +497,37 @@ function buildTextures(scene) {
   });
 
   // Merlin sleeping (for credits scene)
-  make('merlin-sleep',200,90,g=>{
-    g.fillStyle(0x000000,0.15);g.fillEllipse(105,86,170,14);
-    // Body lying sideways
-    g.fillStyle(0x111111,1);g.fillEllipse(108,58,158,52);
-    // Paw stretched forward (like Image 1)
-    g.fillStyle(0x111111,1);g.fillRoundedRect(40,18,58,22,8);
+  make('merlin-sleep',190,76,g=>{
+    // Shadow
+    g.fillStyle(0x000000,0.12);g.fillEllipse(100,72,162,12);
+    // Body lying on side — horizontal main mass
+    g.fillStyle(0x111111,1);g.fillEllipse(106,50,152,46);
+    // Legs folded tucked underneath (subtle, not sticking out)
+    g.fillStyle(0x0c0c0c,1);
+    g.fillEllipse(72,62,28,14);g.fillEllipse(106,64,26,12);g.fillEllipse(138,62,24,12);
+    // Paw stretched forward (the iconic Image 1 pose — one paw resting out)
+    g.fillStyle(0x111111,1);g.fillRoundedRect(38,10,62,19,7);
     g.fillStyle(0x0d0d0d,1);
-    [45,56,67,78,89].forEach(x=>g.fillCircle(x,18,6));
-    g.fillStyle(0x1a1a1a,1);g.fillEllipse(85,30,32,18);
-    // Head on left
-    g.fillStyle(0x1c1c1c,1);g.fillCircle(24,46,28);
-    g.fillStyle(0x242424,1);g.fillEllipse(40,56,28,20);
-    g.fillStyle(0x0e0e0e,1);g.fillEllipse(48,51,14,10);
-    // Ears flopped down
-    g.fillStyle(0x0d0d0d,1);g.fillEllipse(10,36,20,32);g.fillEllipse(30,30,18,28);
-    // CLOSED EYES (key — he is asleep)
+    [42,52,62,72,84].forEach(x=>g.fillCircle(x,10,5));
+    // Tail tip (right end)
+    g.fillStyle(0x111111,1);g.fillEllipse(176,34,18,11);g.fillEllipse(183,25,12,8);
+    // Neck into head
+    g.fillStyle(0x111111,1);g.fillEllipse(34,46,30,36);
+    // Head (left side, recognisably Merlin)
+    g.fillStyle(0x1c1c1c,1);g.fillCircle(22,44,26);
+    // Snout
+    g.fillStyle(0x242424,1);g.fillEllipse(38,52,26,17);
+    // Nose
+    g.fillStyle(0x0e0e0e,1);g.fillEllipse(46,48,12,8);
+    // Ears (floppy, resting sideways)
+    g.fillStyle(0x0d0d0d,1);g.fillEllipse(9,34,17,30);g.fillEllipse(26,27,16,26);
+    // CLOSED EYES — clearly sleeping
     g.lineStyle(2.5,0x4a2800,1);
-    g.beginPath();g.arc(16,44,5,0,Math.PI);g.strokePath();
-    g.beginPath();g.arc(30,41,5,0,Math.PI);g.strokePath();
-    // Collar
-    g.fillStyle(0x4488DD,1);g.fillRoundedRect(8,64,22,7,3);
-    g.fillStyle(0xFFD700,1);[11,16,21,27].forEach(cx=>g.fillCircle(cx,67,2));
-    // Back legs tucked
-    g.fillStyle(0x0e0e0e,1);g.fillRoundedRect(162,60,30,22,6);g.fillRoundedRect(178,56,20,18,5);
-    // Tail tip
-    g.fillStyle(0x111111,1);g.fillEllipse(190,38,18,12);g.fillEllipse(197,28,12,8);
+    g.beginPath();g.arc(15,41,5,0,Math.PI);g.strokePath();
+    g.beginPath();g.arc(28,38,5,0,Math.PI);g.strokePath();
+    // Pizza collar
+    g.fillStyle(0x4488DD,1);g.fillRoundedRect(5,59,24,7,3);
+    g.fillStyle(0xFFD700,1);[8,13,19,25].forEach(cx=>g.fillCircle(cx,62,2));
   });
 }
 
@@ -3020,8 +3025,12 @@ class Ch5HomeScene extends Phaser.Scene {
     this.time.delayedCall(600,()=>{
       this.cameras.main.fadeIn(800);
       this.cameras.main.setBackgroundColor('#050306');
-      // Merlin still sleeping in background (faint)
-      this.add.sprite(W/2+20,H-148,'merlin-sleep').setScale(1.38).setDepth(1).setAlpha(0.22);
+      // Reuse existing merlinBed — stop breathing tween, fade to background dim
+      if(this.merlinBed){
+        this.tweens.killTweensOf(this.merlinBed);
+        this.merlinBed.setAlpha(0.20).setDepth(1);
+        this.sleepRef=this.merlinBed;
+      }
       // GAME OVER text
       const gb=this.add.text(W/2,H/2-90,'Thanks for playing.',{
         fontSize:'22px',color:'#D4A843',fontFamily:'Fredoka One,sans-serif'
@@ -3042,8 +3051,8 @@ class Ch5HomeScene extends Phaser.Scene {
   _credits(){
     const W=this.scale.width,H=this.scale.height;
     // Sleeping Merlin stays in background
-    this.merlinCredits=this.add.sprite(W/2+20,H-148,'merlin-sleep').setScale(1.38).setDepth(2).setAlpha(0.18);
-    const gentle=this.tweens.add({targets:this.merlinCredits,scaleY:1.42,duration:2200,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+    // Dim the existing sleeping sprite a touch more for credits backdrop
+    if(this.sleepRef)this.sleepRef.setAlpha(0.15);
 
     const creditLines=[
       '',
@@ -3133,8 +3142,9 @@ class Ch5HomeScene extends Phaser.Scene {
     // Quick blackout flash
     this.cameras.main.flash(200,0,0,0);
     this.time.delayedCall(300,()=>{
-      // The sleeping Merlin pops up — wide awake, has a thought
-      this.add.sprite(W/2+20,H-148,'merlin-sleep').setScale(1.38).setDepth(2).setAlpha(0.15);
+      // Remove the sleeping Merlin — he's AWAKE now
+      if(this.sleepRef){this.tweens.killTweensOf(this.sleepRef);this.sleepRef.destroy();this.sleepRef=null;}
+      if(this.merlinBed&&this.merlinBed!==this.sleepRef){this.tweens.killTweensOf(this.merlinBed);this.merlinBed.destroy();}
       const merlinPop=this.add.sprite(W/2,H-200,'merlin-happy').setDepth(15).setAlpha(0).setScale(1.2);
       Audio.boof(1.3);
       this.tweens.add({
