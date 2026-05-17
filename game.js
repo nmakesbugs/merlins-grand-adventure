@@ -320,6 +320,210 @@ function buildTextures(scene) {
     g.fillStyle(0x6A4A2A,1);g.fillRoundedRect(0,18,24,70,5);g.fillRoundedRect(196,18,24,70,5);
     g.fillStyle(0x3A2010,1);g.fillRect(8,92,16,8);g.fillRect(196,92,16,8);
   });
+
+  // ── CH5 CHARACTER SPRITES ────────────────────────────────────────────────
+
+  // Dad (Nick) — black tee, jeans, grey/black hair, on phone
+  make('dad',82,158,g=>{
+    // Jeans
+    g.fillStyle(0x2a3a5a,1);g.fillRoundedRect(16,104,20,48,5);g.fillRoundedRect(44,104,20,48,5);
+    // Black tee
+    g.fillStyle(0x111111,1);g.fillRoundedRect(12,46,58,62,6);
+    // Short sleeves
+    g.fillStyle(0x0e0e0e,1);g.fillRoundedRect(2,48,13,28,5);g.fillRoundedRect(67,48,13,28,5);
+    // Skin forearms
+    g.fillStyle(0xB87848,1);g.fillRoundedRect(3,74,11,24,4);g.fillRoundedRect(68,74,11,24,4);
+    // Phone in right hand
+    g.fillStyle(0x111111,1);g.fillRoundedRect(69,68,10,18,2);
+    g.fillStyle(0x224466,0.8);g.fillRect(70,70,8,14);
+    // Hair — grey/black salt and pepper drawn as dark circle with grey overlay
+    g.fillStyle(0x222222,1);g.fillCircle(41,22,24);
+    g.fillStyle(0x888888,0.38);g.fillCircle(34,16,10);g.fillCircle(48,16,9);g.fillCircle(41,12,8);
+    // Head
+    g.fillStyle(0xB87848,1);g.fillCircle(41,34,22);
+    // Stressed brow
+    g.fillStyle(0x222222,0.6);g.fillRect(31,26,8,3);g.fillRect(44,26,8,3);
+    // Eyes (stressed, slightly narrowed)
+    g.fillStyle(0x1a0a00,1);g.fillCircle(33,33,4);g.fillCircle(49,33,4);
+    g.fillStyle(0xFFFFFF,1);g.fillCircle(35,31,1.5);g.fillCircle(51,31,1.5);
+    // Worried mouth
+    g.lineStyle(2,0x8B4000,1);g.beginPath();g.arc(41,40,7,Math.PI*0.15,Math.PI*0.85);g.strokePath();
+  });
+
+  // Cias — 10, tallest/thinnest, brown hair, worried-running pose
+  make('cias',58,138,g=>{
+    // Shoes
+    g.fillStyle(0x222222,1);g.fillRoundedRect(8,126,16,10,3);g.fillRoundedRect(34,126,16,10,3);
+    // Jeans
+    g.fillStyle(0x2a3866,1);g.fillRoundedRect(10,90,16,40,4);g.fillRoundedRect(34,90,16,40,4);
+    // Shirt (green tee)
+    g.fillStyle(0x3a6632,1);g.fillRoundedRect(8,44,42,50,5);
+    // Thin arms (one forward one back — running)
+    g.fillStyle(0xB87848,1);
+    g.fillRoundedRect(1,46,10,36,4);   // left arm forward
+    g.fillRoundedRect(48,50,10,32,4);  // right arm back
+    // Hair (dark brown, close crop)
+    g.fillStyle(0x2a1200,1);g.fillCircle(29,18,20);
+    // Thin face
+    g.fillStyle(0xB87848,1);g.fillEllipse(29,30,30,36);
+    // Eyes (wide, looking for dog)
+    g.fillStyle(0x1a0a00,1);g.fillCircle(22,29,4);g.fillCircle(36,29,4);
+    g.fillStyle(0xFFFFFF,1);g.fillCircle(24,27,1.5);g.fillCircle(38,27,1.5);
+    // Open mouth calling out
+    g.fillStyle(0x1a0a00,1);g.fillEllipse(29,38,10,8);
+    g.fillStyle(0xCC4444,1);g.fillEllipse(29,40,6,4);
+  });
+
+  // Soren — 9, glasses, slightly squishy build, looking out window
+  make('soren',66,122,g=>{
+    // Shoes
+    g.fillStyle(0x222222,1);g.fillRoundedRect(10,110,18,10,3);g.fillRoundedRect(38,110,18,10,3);
+    // Grey pants
+    g.fillStyle(0x4a4a4a,1);g.fillRoundedRect(12,78,18,36,4);g.fillRoundedRect(36,78,18,36,4);
+    // Hoodie (purple)
+    g.fillStyle(0x5a3a8a,1);g.fillRoundedRect(10,38,46,44,6);
+    // Slightly wider arms
+    g.fillStyle(0xB87848,1);g.fillRoundedRect(2,40,11,36,4);g.fillRoundedRect(53,40,11,36,4);
+    // Hands up (looking out window pose — one hand on glass)
+    g.fillStyle(0xB87848,1);g.fillCircle(64,56,7);
+    // Hair (brown, side part)
+    g.fillStyle(0x2a1200,1);g.fillCircle(33,17,20);g.fillRect(14,17,40,12);
+    // Head (slightly rounder)
+    g.fillStyle(0xB87848,1);g.fillCircle(33,28,20);
+    // GLASSES — key detail
+    g.lineStyle(2.5,0x111111,1);
+    g.strokeRect(19,22,14,12);g.strokeRect(35,22,14,12);
+    g.lineBetween(33,27,35,27);  // bridge
+    g.lineBetween(19,27,14,25);  // left arm
+    g.lineBetween(49,27,54,25);  // right arm
+    // Eyes behind glasses
+    g.fillStyle(0x1a0a00,1);g.fillCircle(26,27,3);g.fillCircle(42,27,3);
+    g.fillStyle(0xFFFFFF,1);g.fillCircle(28,25,1.2);g.fillCircle(44,25,1.2);
+    // Focused expression
+    g.lineStyle(2,0x8B4000,1);g.beginPath();g.arc(33,34,5,0.2,Math.PI-0.2);g.strokePath();
+  });
+
+  // Nolyn — 6, shortest, very smiley, holding treat bag
+  make('nolyn',62,106,g=>{
+    // Shoes (small)
+    g.fillStyle(0x222244,1);g.fillRoundedRect(8,94,16,10,3);g.fillRoundedRect(38,94,16,10,3);
+    // Jeans (short)
+    g.fillStyle(0x2a3866,1);g.fillRoundedRect(10,72,16,26,4);g.fillRoundedRect(36,72,16,26,4);
+    // Bright red shirt
+    g.fillStyle(0xCC3322,1);g.fillRoundedRect(8,34,46,42,6);
+    // Chubby arms
+    g.fillStyle(0xB87848,1);g.fillRoundedRect(1,36,10,32,4);g.fillRoundedRect(51,36,10,32,4);
+    // Treat bag in left hand (shaking it)
+    g.fillStyle(0xDDAA33,1);g.fillRoundedRect(0,56,16,22,4);
+    g.fillStyle(0xCC8822,1);g.fillRect(1,62,14,2);
+    g.fillStyle(0xFFCC44,0.6);g.fillRect(2,58,12,4);
+    // Hair (short messy brown)
+    g.fillStyle(0x2a1200,1);g.fillCircle(31,14,18);g.fillEllipse(31,8,30,14);
+    // Round little kid head
+    g.fillStyle(0xB87848,1);g.fillCircle(31,24,20);
+    // BIG SMILE — defining feature
+    g.fillStyle(0x1a0a00,1);g.fillCircle(24,22,4);g.fillCircle(38,22,4);
+    g.fillStyle(0xFFFFFF,1);g.fillCircle(26,20,1.5);g.fillCircle(40,20,1.5);
+    g.fillStyle(0xCC4444,1);g.fillEllipse(31,32,16,10);
+    g.fillStyle(0xFFFFFF,0.8);g.fillEllipse(31,30,10,5);
+    // Cheek blush dots
+    g.fillStyle(0xEE7777,0.45);g.fillCircle(18,26,5);g.fillCircle(44,26,5);
+  });
+
+  // Thor — large white German shepherd, alert
+  make('thor',155,128,g=>{
+    // Shadow
+    g.fillStyle(0x000000,0.15);g.fillEllipse(75,120,120,16);
+    // Tail (bushy white, raised)
+    g.fillStyle(0xE8E8E0,1);g.fillEllipse(22,58,40,26);g.fillEllipse(14,44,28,18);
+    // Body (large, white/cream)
+    g.fillStyle(0xF2F2EA,1);g.fillEllipse(78,72,118,64);
+    // Legs (four visible)
+    g.fillStyle(0xE8E8E0,1);
+    g.fillRoundedRect(32,86,15,30,5); g.fillRoundedRect(52,86,15,30,5);
+    g.fillRoundedRect(100,86,15,30,5);g.fillRoundedRect(120,86,15,30,5);
+    // Neck
+    g.fillStyle(0xF0F0E8,1);g.fillEllipse(118,54,36,42);
+    // Head (alert, ears up)
+    g.fillStyle(0xEEEEE6,1);g.fillEllipse(126,32,50,44);
+    // Pointy ears up (shepherd)
+    g.fillStyle(0xDDDDD0,1);
+    g.fillTriangle(110,12,120,36,102,36);
+    g.fillTriangle(142,12,152,36,134,36);
+    // Inner ear
+    g.fillStyle(0xCCAA88,0.4);
+    g.fillTriangle(112,16,119,32,106,32);
+    g.fillTriangle(140,16,149,32,136,32);
+    // Snout (long shepherd snout)
+    g.fillStyle(0xDDDDCC,1);g.fillEllipse(138,44,32,20);
+    // Nose
+    g.fillStyle(0x111111,1);g.fillEllipse(146,39,13,9);
+    // Eyes (amber, alert)
+    g.fillStyle(0x8B5E10,1);g.fillCircle(116,28,6);
+    g.fillStyle(0x2a1500,1);g.fillCircle(116,28,3);
+    g.fillStyle(0xFFFFFF,1);g.fillCircle(118,26,2);
+  });
+
+  // Sakura — white Shiba Inu, sliding/smiley
+  make('sakura',100,88,g=>{
+    // Shadow
+    g.fillStyle(0x000000,0.12);g.fillEllipse(50,84,80,12);
+    // Tail (curly Shiba tail, over back)
+    g.fillStyle(0xF0EDE6,1);g.fillCircle(14,34,18);g.fillCircle(18,22,13);g.fillCircle(24,14,8);
+    // Body (compact, round)
+    g.fillStyle(0xF8F5EE,1);g.fillEllipse(52,58,82,48);
+    // Legs
+    g.fillStyle(0xEEEBE4,1);
+    g.fillRoundedRect(22,66,12,22,4);g.fillRoundedRect(38,66,12,22,4);
+    g.fillRoundedRect(60,66,12,22,4);g.fillRoundedRect(76,66,12,22,4);
+    // Neck
+    g.fillStyle(0xF5F2EB,1);g.fillEllipse(76,42,28,30);
+    // Head (round, Shiba)
+    g.fillStyle(0xF2EFE8,1);g.fillCircle(82,26,24);
+    // Ears (small, triangular)
+    g.fillStyle(0xDDD8CE,1);
+    g.fillTriangle(68,8,76,26,62,26);g.fillTriangle(96,8,106,26,92,26);
+    // Snout (Shiba rounded)
+    g.fillStyle(0xCCC8BC,1);g.fillEllipse(88,34,22,16);
+    // Nose
+    g.fillStyle(0x111111,1);g.fillCircle(92,30,5);
+    // Eyes (happy crescent shape — Shiba smile)
+    g.fillStyle(0x2a1500,1);g.fillCircle(74,22,5);g.fillCircle(90,22,5);
+    g.fillStyle(0xFFFFFF,1);g.fillCircle(76,20,2);g.fillCircle(92,20,2);
+    // Shiba happy cheeks
+    g.fillStyle(0xEEAA88,0.4);g.fillCircle(68,26,5);g.fillCircle(96,26,5);
+    // Little tongue (happy slide)
+    g.fillStyle(0xFF9FB5,1);g.fillEllipse(90,40,10,14);
+  });
+
+  // Merlin sleeping (for credits scene)
+  make('merlin-sleep',200,90,g=>{
+    g.fillStyle(0x000000,0.15);g.fillEllipse(105,86,170,14);
+    // Body lying sideways
+    g.fillStyle(0x111111,1);g.fillEllipse(108,58,158,52);
+    // Paw stretched forward (like Image 1)
+    g.fillStyle(0x111111,1);g.fillRoundedRect(40,18,58,22,8);
+    g.fillStyle(0x0d0d0d,1);
+    [45,56,67,78,89].forEach(x=>g.fillCircle(x,18,6));
+    g.fillStyle(0x1a1a1a,1);g.fillEllipse(85,30,32,18);
+    // Head on left
+    g.fillStyle(0x1c1c1c,1);g.fillCircle(24,46,28);
+    g.fillStyle(0x242424,1);g.fillEllipse(40,56,28,20);
+    g.fillStyle(0x0e0e0e,1);g.fillEllipse(48,51,14,10);
+    // Ears flopped down
+    g.fillStyle(0x0d0d0d,1);g.fillEllipse(10,36,20,32);g.fillEllipse(30,30,18,28);
+    // CLOSED EYES (key — he is asleep)
+    g.lineStyle(2.5,0x4a2800,1);
+    g.beginPath();g.arc(16,44,5,0,Math.PI);g.strokePath();
+    g.beginPath();g.arc(30,41,5,0,Math.PI);g.strokePath();
+    // Collar
+    g.fillStyle(0x4488DD,1);g.fillRoundedRect(8,64,22,7,3);
+    g.fillStyle(0xFFD700,1);[11,16,21,27].forEach(cx=>g.fillCircle(cx,67,2));
+    // Back legs tucked
+    g.fillStyle(0x0e0e0e,1);g.fillRoundedRect(162,60,30,22,6);g.fillRoundedRect(178,56,20,18,5);
+    // Tail tip
+    g.fillStyle(0x111111,1);g.fillEllipse(190,38,18,12);g.fillEllipse(197,28,12,8);
+  });
 }
 
 // ── BOOT SCENE ─────────────────────────────────────────────────────────────
@@ -2396,9 +2600,574 @@ class Ch4NavScene extends Phaser.Scene {
       ],()=>{
         titleCard(this,'CHAPTER 5','"MERLIN ARRIVES HOME"',()=>{
           this.cameras.main.fadeOut(400);
-          this.time.delayedCall(400,()=>this.scene.start('StubScene'));
+          this.time.delayedCall(400,()=>this.scene.start('Ch5ArrivalScene'));
         });
       });
+    });
+  }
+}
+
+// [INIT_REPLACED_CH5]
+
+// ── CHAPTER 5: ARRIVAL SCENE (top-down JRPG approach) ────────────────────
+class Ch5ArrivalScene extends Phaser.Scene {
+  constructor(){super('Ch5ArrivalScene');}
+
+  create(){
+    this.cameras.main.fadeIn(900);
+    const W=this.scale.width,H=this.scale.height;
+    this._buildNeighborhood(W,H);
+    // Small Merlin at bottom — walking north
+    this.merlin=this.add.sprite(W/2,H-55,'merlin-w1').setScale(0.40).setDepth(10);
+    this.dlg=new Dialogue(this);
+    // Location card (JRPG style)
+    const loc=this.add.text(18,18,'FITCHBURG, WI',{fontSize:'12px',color:'#D4A843',fontFamily:'Fredoka One,sans-serif',letterSpacing:3}).setDepth(20);
+    const tim=this.add.text(W-18,18,'11:47 PM',{fontSize:'12px',color:'#6688AA',fontFamily:'Nunito,sans-serif'}).setOrigin(1,0).setDepth(20);
+    this.tweens.add({targets:[loc,tim],alpha:0,duration:400,delay:3500});
+    this.time.delayedCall(600,()=>this._walk());
+  }
+
+  _buildNeighborhood(W,H){
+    // Night sky
+    this.add.rectangle(W/2,H/2,W,H,0x03030a);
+    for(let i=0;i<28;i++) this.add.circle(Phaser.Math.Between(0,W),Phaser.Math.Between(0,H*0.45),Phaser.Math.Between(1,2),0xFFFFFF,Phaser.Math.FloatBetween(0.15,0.85));
+    // Moon
+    this.add.circle(W-55,55,22,0xFFFFEE,0.9);
+    this.add.circle(W-48,50,18,0x03030a,0.85); // crescent cutout
+    // Neighborhood: two neighboring houses (dark, no lights)
+    this.add.rectangle(68,H/2-60,110,180,0x181820); // left house
+    this.add.triangle(18,H/2-150,118,H/2-150,68,H/2-220,0x141418); // left roof
+    this.add.rectangle(W-68,H/2-60,110,180,0x181820); // right house
+    this.add.triangle(W-18,H/2-150,W-118,H/2-150,W-68,H/2-220,0x141418); // right roof
+    // Street trees (silhouette)
+    [60,W-60].forEach(tx=>{
+      this.add.circle(tx,H/2+80,20,0x0e1a0e);
+      this.add.rectangle(tx,H/2+110,6,40,0x0e1a0e);
+    });
+
+    // 5608 POLWORTH — center, lit up (home is lit, neighbors are dark)
+    const hx=W/2, hy=H/2-55;
+    // Yard (glowing from inside light spill)
+    this.add.rectangle(hx,hy+155,200,90,0x141e0a);
+    this.add.rectangle(hx,hy+150,180,60,0x1a2a0e,0.8);
+    // House body
+    this.add.rectangle(hx,hy,200,170,0x2e2820);
+    this.add.rectangle(hx,hy,196,166,0x3e3828);
+    // Roof
+    const g=this.add.graphics().setDepth(3);
+    g.fillStyle(0x1e1610,1);
+    g.fillTriangle(hx-108,hy-83,hx+108,hy-83,hx,hy-168);
+    // Lit windows — warm amber glow (someone is definitely panicking inside)
+    const wins=[[hx-62,hy-22],[hx+62,hy-22],[hx-62,hy+28],[hx+40,hy+28]];
+    wins.forEach(([wx,wy])=>{
+      // Outer glow
+      this.add.rectangle(wx,wy,64,46,0xFFAA22,0.14);
+      this.add.rectangle(wx,wy,56,40,0xFFBB44,0.9);
+      this.add.rectangle(wx,wy,52,36,0xFFCC66,0.75);
+      // Window cross
+      this.add.rectangle(wx,wy,2,36,0x3e3828,0.7);
+      this.add.rectangle(wx,wy,52,2,0x3e3828,0.7);
+      // Silhouette inside (pacing — someone's looking)
+      const sil=this.add.rectangle(wx+Phaser.Math.Between(-14,14),wy,7,24,0x110808,0.7).setDepth(4);
+      this.tweens.add({targets:sil,x:wx+Phaser.Math.Between(-16,16),duration:Phaser.Math.Between(700,1200),yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+    });
+    // Front door
+    this.add.rectangle(hx,hy+72,36,58,0x1e1008).setDepth(3);
+    this.add.rectangle(hx,hy+72,32,54,0x2e1a10).setDepth(4);
+    this.add.circle(hx+10,hy+72,4,0xDDAA44).setDepth(5);
+    // House number
+    this.add.text(hx,hy+84,'5608',{fontSize:'12px',color:'#CCAA55',fontFamily:'Fredoka One,sans-serif'}).setOrigin(0.5).setDepth(6);
+    // Warm light spill below door
+    this.add.rectangle(hx,hy+160,120,60,0xFFAA22,0.06).setDepth(1);
+    // Sidewalk
+    this.add.rectangle(W/2,H-82,W,36,0x242420);
+    // Street
+    this.add.rectangle(W/2,H-36,W,72,0x181814);
+    // Street center line
+    for(let x=0;x<W;x+=50) this.add.rectangle(x+25,H-36,25,3,0x666600,0.5);
+  }
+
+  _walk(){
+    const W=this.scale.width,H=this.scale.height; let f=0;
+    // Merlin walks north toward the house (auto-cinematic, no player input)
+    this.tweens.add({
+      targets:this.merlin, y:H/2+105, duration:3200, ease:'Linear',
+      onUpdate:()=>{ f++; this.merlin.setTexture(f%14<7?'merlin-w1':'merlin-w2'); },
+      onComplete:()=>{
+        this.merlin.setTexture('merlin-sit');
+        this.merlin.setFlipX(false);
+        this._doorstep();
+      }
+    });
+  }
+
+  _doorstep(){
+    const W=this.scale.width;
+    this.dlg.show([
+      {speaker:'Merlin',text:'Merlin went to the outside.'},
+      {speaker:'Merlin',text:'He got the loud stick. He had four drinks. He did science.'},
+      {speaker:'Merlin',text:'He read a map. He crossed four roads. He was very brave.'},
+      {speaker:'Merlin',text:'And now he is here.'},
+      {speaker:'Merlin',text:'Because here is where the Cuddles are.'},
+    ],()=>this._enter());
+  }
+
+  _enter(){
+    const W=this.scale.width,H=this.scale.height;
+    // Light burst as door opens
+    const beam=this.add.rectangle(W/2,H/2+88,36,200,0xFFEECC).setAlpha(0).setDepth(15);
+    this.tweens.add({targets:beam,alpha:0.55,scaleX:5,duration:380,ease:'Power2'});
+    this.tweens.add({targets:this.merlin,y:H/2+60,alpha:0,duration:500,delay:200});
+    this.time.delayedCall(1000,()=>{
+      titleCard(this,'CHAPTER 5','"MERLIN ARRIVES HOME"',()=>{
+        this.cameras.main.fadeOut(500);
+        this.time.delayedCall(500,()=>this.scene.start('Ch5HomeScene'));
+      });
+    });
+  }
+}
+
+// ── CHAPTER 5: HOME SCENE ─────────────────────────────────────────────────
+class Ch5HomeScene extends Phaser.Scene {
+  constructor(){super('Ch5HomeScene');}
+
+  create(){
+    this.cameras.main.fadeIn(600);
+    const W=this.scale.width,H=this.scale.height;
+    this._buildInterior(W,H);
+    this.dlg=new Dialogue(this);
+    // Populate family in panic
+    this._spawnFamily(W,H);
+    this.time.delayedCall(400,()=>this._chaosPhase());
+  }
+
+  _buildInterior(W,H){
+    // Warm house interior — same base as prologue but more lived-in
+    this.add.rectangle(W/2,H/2,W,H,0xE8DCC8);
+    for(let x=0;x<W;x+=64)this.add.image(x+32,H-40,'floor');
+    this.add.rectangle(W/2,H-82,W,44,0xB89060);
+    this.add.rectangle(W/2,H-124,W,8,0xD0B07A);
+    // Window left
+    this.add.rectangle(88,H/2-92,80,100,0xA8C8E8);
+    this.add.rectangle(88,H/2-92,86,106,0x000000,0).setStrokeStyle(5,0x8B6914);
+    this.add.rectangle(88,H/2-92,2,106,0x8B6914);
+    this.add.rectangle(88,H/2-92,86,2,0x8B6914);
+    // Night through window (darker than prologue)
+    this.add.rectangle(88,H/2-92,76,94,0x060810,0.6);
+    // Couch (background)
+    this.add.rectangle(W/2-40,H-172,190,58,0x7A5A3A).setDepth(2);
+    this.add.rectangle(W/2-40,H-192,190,22,0x9A7A5A).setDepth(3);
+    this.add.rectangle(W/2-106,H-178,82,50,0x9A7A5A).setDepth(3);
+    this.add.rectangle(W/2+26,H-178,82,50,0x9A7A5A).setDepth(3);
+    // Dog leash by door (nice detail)
+    this.add.rectangle(W-24,H-190,8,50,0xAA8833,0.8).setDepth(3);
+    // Front door left (ajar — Merlin just came through)
+    this.doorL=this.add.rectangle(24,H-152,48,168,0x9A7220).setDepth(5);
+    this.add.rectangle(24,H-152,44,164,0xB28830).setDepth(6);
+  }
+
+  _spawnFamily(W,H){
+    // Dad — center-right, on phone, pacing
+    this.dad=this.add.sprite(W-80,H-178,'dad').setDepth(8).setScale(1.05);
+    // Cias — left side, running
+    this.cias=this.add.sprite(W/2-60,H-172,'cias').setDepth(8).setScale(1.0);
+    // Soren — at window, looking out
+    this.soren=this.add.sprite(130,H-175,'soren').setDepth(8).setScale(1.0);
+    // Nolyn — center, shaking treat bag
+    this.nolyn=this.add.sprite(W/2+20,H-168,'nolyn').setDepth(9).setScale(1.0);
+    // Mom — near door (left)
+    this.momCh5=this.add.sprite(75,H-175,'mom').setDepth(8).setScale(1.0);
+  }
+
+  _chaosPhase(){
+    const W=this.scale.width,H=this.scale.height;
+    // Everyone in motion at once — pure chaos
+    // Cias runs left-right
+    this.tweens.add({targets:this.cias,x:W/2-110,duration:700,yoyo:true,repeat:3,ease:'Linear'});
+    // Dad paces
+    this.tweens.add({targets:this.dad,x:W-120,duration:900,yoyo:true,repeat:3,ease:'Sine.easeInOut'});
+    // Nolyn bounces (shaking treats)
+    this.tweens.add({targets:this.nolyn,y:H-162,duration:300,yoyo:true,repeat:8,ease:'Sine.easeInOut'});
+    // Mom looking left (for Merlin)
+    this.momCh5.setFlipX(true);
+
+    // Caption: the sound of panic
+    const panic=this.add.text(W/2,H/2,'MERLIN!\nMERLIN!!\nMERLIN!!!',{
+      fontSize:'32px',color:'#CC2222',fontFamily:'Fredoka One,sans-serif',
+      align:'center',stroke:'#000000',strokeThickness:4
+    }).setOrigin(0.5).setDepth(20).setAlpha(0);
+    this.tweens.add({targets:panic,alpha:1,duration:300,delay:200,
+      onComplete:()=>this.tweens.add({targets:panic,alpha:0,duration:400,delay:800,onComplete:()=>panic.destroy()})});
+
+    // After chaos: Merlin enters
+    this.time.delayedCall(2200,()=>this._merlinEnters());
+  }
+
+  _merlinEnters(){
+    const W=this.scale.width,H=this.scale.height;
+    // Stop all chaos tweens (scene cleanup handles it)
+    // Merlin walks in through door
+    this.merlin=this.add.sprite(-60,H-158,'merlin-w1').setFlipX(true).setDepth(10);
+    let f=0;
+    this.tweens.add({
+      targets:this.merlin, x:W/2-80, duration:1400, ease:'Linear',
+      onUpdate:()=>{ f++; this.merlin.setTexture(f%14<7?'merlin-w1':'merlin-w2'); },
+      onComplete:()=>{
+        this.merlin.setTexture('merlin-happy');
+        // EVERYONE FREEZES
+        this.cameras.main.shake(100,0.005);
+        this.time.delayedCall(400,()=>this._petsEnter());
+      }
+    });
+  }
+
+  _petsEnter(){
+    const W=this.scale.width,H=this.scale.height;
+    // Thor rounds corner from right — skids to stop
+    this.thor=this.add.sprite(W+60,H-165,'thor').setDepth(9).setScale(0.95).setFlipX(true);
+    this.tweens.add({targets:this.thor,x:W/2+100,duration:800,ease:'Power3',
+      onComplete:()=>{
+        // Skid effect
+        this.cameras.main.shake(120,0.006);
+        this._thorDialogue();
+      }});
+  }
+
+  _thorDialogue(){
+    const W=this.scale.width,H=this.scale.height;
+    this.dlg.show([
+      {speaker:'Thor',  text:'...where were you.'},
+      {speaker:'Merlin',text:'Adventure.'},
+      {speaker:'Thor',  text:'You smell like a bar and something clinical.'},
+      {speaker:'Merlin',text:'I had a busy day.'},
+      {speaker:'Thor',  text:'Were you scared?'},
+      {speaker:'Merlin',text:'Only of the cat. And a little of the raccoon. The raccoon was a small angry wizard.'},
+      {speaker:'Thor',  text:'I need you to know I did not touch your spot on the couch.'},
+      {speaker:'Merlin',text:'Thor.'},
+      {speaker:'Thor',  text:'I was on it for six hours. But I did not touch it.'},
+    ],()=>this._sakuraEnters());
+  }
+
+  _sakuraEnters(){
+    const W=this.scale.width,H=this.scale.height;
+    // Sakura slides in on hardwood floors
+    this.sakura=this.add.sprite(W+40,H-152,'sakura').setDepth(9).setFlipX(true).setScale(0.95);
+    this.tweens.add({
+      targets:this.sakura, x:W/2+155, duration:600, ease:'Linear',
+      onComplete:()=>{
+        // Slide overshoot + settle
+        this.tweens.add({targets:this.sakura,x:W/2+145,duration:200,ease:'Back.Out',
+          onComplete:()=>this._sakuraDialogue()});
+      }
+    });
+  }
+
+  _sakuraDialogue(){
+    this.dlg.show([
+      {speaker:'Sakura',text:'YOU SMELL SO WRONG.'},
+      {speaker:'Merlin',text:'Hello Sakura.'},
+      {speaker:'Sakura',text:'YOU SMELL LIKE OUTSIDE AND MEDICINE AND SOMETHING ELSE.'},
+      {speaker:'Merlin',text:'Sakura. Merlin has SEEN THINGS.'},
+      {speaker:'Sakura',text:'Was it scary?'},
+      {speaker:'Merlin',text:'It was a lot.'},
+      {speaker:'Sakura',text:'Did you get snacks.'},
+      {speaker:'Merlin',text:'No.'},
+      {speaker:'Sakura',text:'That was a mistake.'},
+    ],()=>this._familyConverges());
+  }
+
+  _familyConverges(){
+    const W=this.scale.width,H=this.scale.height;
+    // Everyone notices and converges
+    const targets=[this.dad,this.cias,this.soren,this.momCh5,this.nolyn];
+    const destX=[W/2+60,W/2-20,W/2-80,W/2-120,W/2+20];
+    targets.forEach((t,i)=>{
+      this.tweens.add({targets:t,x:destX[i],duration:700,ease:'Power2'});
+    });
+    // Nolyn especially excited
+    this.tweens.add({targets:this.nolyn,y:H-175,duration:200,yoyo:true,repeat:4,ease:'Sine.easeInOut'});
+
+    this.time.delayedCall(900,()=>{
+      // Caption: the petting
+      const pet=this.add.text(W/2,H/2-20,'good boy good boy GOOD BOY',{
+        fontSize:'18px',color:'#D4A843',fontFamily:'Fredoka One,sans-serif',
+        align:'center',stroke:'#000000',strokeThickness:3,alpha:0.9
+      }).setOrigin(0.5).setDepth(25).setAlpha(0);
+      this.tweens.add({targets:pet,alpha:1,duration:300});
+      this.time.delayedCall(1800,()=>{
+        this.tweens.add({targets:pet,alpha:0,duration:400,onComplete:()=>{pet.destroy();this._explanationPhase();}});
+      });
+    });
+  }
+
+  _explanationPhase(){
+    const W=this.scale.width,H=this.scale.height;
+    // Dad kneels down (moves lower), hand on Merlin
+    this.tweens.add({targets:this.dad,y:H-155,duration:400});
+    // Caption: Merlin tries to explain
+    const explain=this.add.text(W/2,H/2-60,'Merlin tried to explain.\nEveryone just petted him.',{
+      fontSize:'14px',color:'#F0EAD8',fontFamily:'Nunito,sans-serif',
+      align:'center',backgroundColor:'#00000088',padding:{x:10,y:8}
+    }).setOrigin(0.5).setDepth(25).setAlpha(0);
+    this.tweens.add({targets:explain,alpha:1,duration:300});
+    this.time.delayedCall(1400,()=>{
+      this.tweens.add({targets:explain,alpha:0,duration:300,onComplete:()=>{
+        explain.destroy();
+        this.dlg.show([
+          {speaker:'Merlin',text:'Merlin went to the outside. It smelled like everything and also several concerning things.'},
+          {speaker:'Merlin',text:'Bad men wanted Merlin. Merlin got their loud stick. He was extremely cool about it.'},
+          {speaker:'Merlin',text:'The bar had four drinks. A lady wanted money. Merlin had love. She did not want love. Merlin left.'},
+          {speaker:'Merlin',text:'A science clinic had a couch that was alive. Merlin made friends with it. The couch was a good friend.'},
+          {speaker:'Merlin',text:'Merlin read a map. He crossed four roads. He outfoxed a raccoon who was possibly a small wizard.'},
+          {speaker:'Merlin',text:'And now Merlin is here. Because here is where the true Cuddles are.'},
+          {speaker:'Merlin',text:'This is what happened. Merlin has explained it. The family may now process this information.'},
+        ],()=>this._dadMoment());
+      }});
+    });
+  }
+
+  _dadMoment(){
+    const W=this.scale.width,H=this.scale.height;
+    this.dlg.show([
+      {speaker:'Dad',   text:'You crazy dog. Do not ever do that again.'},
+      {speaker:'Merlin',text:'Dad smells like safe.'},
+      {speaker:'Merlin',text:'Dad does not know what Merlin did today. This is okay.'},
+      {speaker:'Merlin',text:'Merlin knows. And Merlin is enough.'},
+    ],()=>this._toBed());
+  }
+
+  _toBed(){
+    const W=this.scale.width,H=this.scale.height;
+    // Family clears, Merlin walks toward bedroom (right side → fades out)
+    this.merlin.setFlipX(true);
+    let f=0;
+    this.tweens.add({
+      targets:[this.dad,this.cias,this.soren,this.momCh5,this.nolyn,this.thor,this.sakura],
+      alpha:0, duration:700, ease:'Power2'
+    });
+    this.tweens.add({
+      targets:this.merlin, x:W+80, duration:1400, ease:'Linear',
+      onUpdate:()=>{ f++; this.merlin.setTexture(f%14<7?'merlin-w1':'merlin-w2'); },
+      onComplete:()=>this._bedScene()
+    });
+  }
+
+  _bedScene(){
+    // Fade to bedroom
+    this.cameras.main.fadeOut(600);
+    this.time.delayedCall(600,()=>{
+      this.cameras.main.setBackgroundColor('#0e0a06');
+      this.cameras.main.fadeIn(700);
+      const W=this.scale.width,H=this.scale.height;
+      // Bedroom — dark, warm, quiet
+      this.add.rectangle(W/2,H/2,W,H,0x0e0a06);
+      this.add.rectangle(W/2,H/2-60,W,H*0.5,0x1a1208); // wall
+      // Bed frame
+      this.add.rectangle(W/2,H-110,W-20,200,0x2a1808).setDepth(3);
+      // Sheets
+      this.add.rectangle(W/2,H-90,W-40,165,0xD8D0C0).setDepth(4);
+      // Pillow
+      this.add.rectangle(W/2-80,H-170,150,54,0xCCCCBB).setDepth(5);
+      // Soft nightlight glow
+      this.add.circle(W-40,H-280,35,0xFFAA44,0.08).setDepth(2);
+
+      // Merlin on bed — sleeping
+      this.merlinBed=this.add.sprite(W/2+30,H-148,'merlin-sleep').setScale(1.38).setDepth(6);
+      // Gentle breathing pulse
+      this.tweens.add({targets:this.merlinBed,scaleY:1.42,duration:2200,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+
+      // Final caption sequence
+      this.time.delayedCall(800,()=>this._finalCaptions());
+    });
+  }
+
+  _finalCaptions(){
+    const lines=[
+      'Home is the smell of Dad.',
+      'Home is the Boys and their salty snacks.',
+      'Home is Thor on the wrong side of the couch. Every time. For years.',
+      'Home is Sakura doing the stare that Merlin does not understand.',
+      'Home is Mom, who makes Merlin handsome.',
+      'Home is where the Cuddles are.',
+      'Merlin went outside today.',
+      'He did not need to.',
+      'He knows this now.',
+      '...At least for now.',
+    ];
+    const W=this.scale.width,H=this.scale.height;
+    let i=0;
+    const showNext=()=>{
+      if(i>=lines.length){ this._goodBoyScreen(); return; }
+      const cap=this.add.text(W/2,H/2-30,lines[i],{
+        fontSize:'16px',color:'#F0EAD8',fontFamily:'Nunito,sans-serif',
+        align:'center',wordWrap:{width:320},
+        backgroundColor:i>6?'#00000000':'#00000066',padding:{x:12,y:8}
+      }).setOrigin(0.5).setDepth(20).setAlpha(0);
+      // Last few lines get gold treatment
+      if(i>=7)cap.setColor('#D4A843').setFontFamily('Fredoka One,sans-serif').setFontSize('20px');
+      if(i===9)cap.setColor('#FFFFFF').setFontSize('22px');
+      this.tweens.add({targets:cap,alpha:1,duration:500,
+        onComplete:()=>this.time.delayedCall(i===9?2400:1600,()=>{
+          this.tweens.add({targets:cap,alpha:0,duration:400,onComplete:()=>{cap.destroy();i++;showNext();}});
+        })});
+    };
+    showNext();
+  }
+
+  _goodBoyScreen(){
+    const W=this.scale.width,H=this.scale.height;
+    this.cameras.main.fadeOut(600);
+    this.time.delayedCall(600,()=>{
+      this.cameras.main.fadeIn(800);
+      this.cameras.main.setBackgroundColor('#050306');
+      // Merlin still sleeping in background (faint)
+      this.add.sprite(W/2+20,H-148,'merlin-sleep').setScale(1.38).setDepth(1).setAlpha(0.22);
+      // GAME OVER text
+      const gb=this.add.text(W/2,H/2-90,'Thanks for playing.',{
+        fontSize:'22px',color:'#D4A843',fontFamily:'Fredoka One,sans-serif'
+      }).setOrigin(0.5).setDepth(10).setAlpha(0);
+      const gb2=this.add.text(W/2,H/2-55,'Good boy.',{
+        fontSize:'36px',color:'#F0EAD8',fontFamily:'Fredoka One,sans-serif'
+      }).setOrigin(0.5).setDepth(10).setAlpha(0);
+      const snore=this.add.text(W/2+30,H-178,'z z z',{
+        fontSize:'14px',color:'#AAAACC',fontFamily:'Nunito,sans-serif',alpha:0.5
+      }).setOrigin(0.5).setDepth(10).setAlpha(0);
+      this.tweens.add({targets:[gb,gb2,snore],alpha:1,duration:700,delay:200});
+      this.tweens.add({targets:snore,y:H-198,duration:2000,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+      // Start credits after pause
+      this.time.delayedCall(2200,()=>this._credits());
+    });
+  }
+
+  _credits(){
+    const W=this.scale.width,H=this.scale.height;
+    // Sleeping Merlin stays in background
+    this.merlinCredits=this.add.sprite(W/2+20,H-148,'merlin-sleep').setScale(1.38).setDepth(2).setAlpha(0.18);
+    const gentle=this.tweens.add({targets:this.merlinCredits,scaleY:1.42,duration:2200,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+
+    const creditLines=[
+      '',
+      'MERLIN\'S GRAND ADVENTURE',
+      '',
+      'STARRING',
+      'Merlin Frenzer',
+      'Age 3  ·  Black Lab',
+      '"He is a very good boy."',
+      '',
+      '',
+      'ALSO STARRING',
+      '',
+      'MERLIN\'S BED',
+      'Supporting role since Day One',
+      'Has never let him down',
+      'Also supports Dad sometimes',
+      '',
+      'MERLIN\'S FAVORITE SNACKS',
+      'Cheese (unauthorized but yes)',
+      'Table crumbs from the Boys',
+      'Whatever Dad is having',
+      'Anything on the floor',
+      '"Technically not allowed"',
+      '"Still happening though"',
+      '',
+      '',
+      'SPECIAL THANKS',
+      '',
+      'Thor',
+      'For always taking the wrong cushion.',
+      '',
+      'Sakura',
+      'For the stare.',
+      '',
+      'Cias',
+      'Soren',
+      'Nolyn',
+      'For the salty hands.',
+      '',
+      'Tanisha',
+      'For the nail clippers.',
+      'For making Merlin handsome.',
+      '',
+      'Nick',
+      'For smelling like safe.',
+      '',
+      '',
+      '"And so the adventure ended.',
+      'As all good adventures end.',
+      'At home."',
+      '',
+      '',
+      'A FRENZER FAMILY PRODUCTION',
+      '2025',
+      '',
+      '',
+      '',
+    ].join('\n');
+
+    const ctxt=this.add.text(W/2,H+30,creditLines,{
+      fontSize:'14px',color:'#C8C0B0',fontFamily:'Nunito,sans-serif',
+      align:'center',lineSpacing:7,
+    }).setOrigin(0.5,0).setDepth(10);
+
+    // Style special lines
+    const totalH=ctxt.height;
+    // Scroll upward
+    this.tweens.add({
+      targets:ctxt,
+      y:-totalH-80,
+      duration:totalH*95, // ~90ms per px = comfortable reading pace
+      ease:'Linear',
+      onComplete:()=>{ ctxt.destroy(); this._stinger(); }
+    });
+
+    // Tap to skip to stinger
+    this._skipInput=this.input.once('pointerdown',()=>{
+      this.tweens.killTweensOf(ctxt);
+      ctxt.destroy();
+      this._stinger();
+    });
+  }
+
+  _stinger(){
+    const W=this.scale.width,H=this.scale.height;
+    // Quick blackout flash
+    this.cameras.main.flash(200,0,0,0);
+    this.time.delayedCall(300,()=>{
+      // The sleeping Merlin pops up — wide awake, has a thought
+      this.add.sprite(W/2+20,H-148,'merlin-sleep').setScale(1.38).setDepth(2).setAlpha(0.15);
+      const merlinPop=this.add.sprite(W/2,H-200,'merlin-happy').setDepth(15).setAlpha(0).setScale(1.2);
+      Audio.boof(1.3);
+      this.tweens.add({
+        targets:merlinPop, alpha:1, y:H-220, duration:220, ease:'Back.Out',
+        onComplete:()=>{
+          this.cameras.main.shake(180,0.014);
+          this.time.delayedCall(300,()=>{
+            this.dlg.show([
+              {speaker:'Merlin',text:'I need to tell Uncle Anthony about Ketamine!'}
+            ],()=>{
+              // Hard cut to black
+              this.time.delayedCall(600,()=>{
+                this.cameras.main.fadeOut(800,0,0,0);
+                this.time.delayedCall(1400,()=>this._playAgain());
+              });
+            });
+          });
+        }
+      });
+    });
+  }
+
+  _playAgain(){
+    const W=this.scale.width,H=this.scale.height;
+    this.cameras.main.fadeIn(600);
+    this.cameras.main.setBackgroundColor('#000000');
+    const tap=this.add.text(W/2,H/2,'TAP TO PLAY AGAIN',{
+      fontSize:'18px',color:'#D4A843',fontFamily:'Fredoka One,sans-serif',letterSpacing:4
+    }).setOrigin(0.5).setDepth(10);
+    this.tweens.add({targets:tap,alpha:0.15,duration:700,yoyo:true,repeat:-1});
+    this.input.once('pointerdown',()=>{
+      this.cameras.main.fadeOut(400);
+      this.time.delayedCall(400,()=>this.scene.start('BootScene'));
     });
   }
 }
@@ -2413,6 +3182,7 @@ window.addEventListener('load',()=>{
            Ch2IntroScene,Ch2DrinkScene,Ch2DrunkScene,
            Ch3IntroScene,Ch3PuzzleScene,Ch3TripScene,
            Ch4GasScene,Ch4NavScene,
+           Ch5ArrivalScene,Ch5HomeScene,
            StubScene]
   });
 
@@ -2430,19 +3200,18 @@ window.addEventListener('load',()=>{
     {label:'Ch3 Trip',      key:'Ch3TripScene'},
     {label:'Ch4 Lost',      key:'Ch4GasScene'},
     {label:'Ch4 Nav',       key:'Ch4NavScene'},
-    {label:'Stub / Ch5',    key:'StubScene'},
+    {label:'Ch5 Arrival',   key:'Ch5ArrivalScene'},
+    {label:'Ch5 Home',      key:'Ch5HomeScene'},
+    {label:'Stub',          key:'StubScene'},
   ];
-
   const dbgBtn=document.createElement('div');
   dbgBtn.id='dbg-toggle';
   dbgBtn.textContent='D';
   dbgBtn.style.cssText='position:fixed;top:10px;right:10px;z-index:99999;width:28px;height:28px;border-radius:6px;background:rgba(212,168,67,0.9);color:#111;font-family:"Fredoka One",sans-serif;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.6);';
   document.body.appendChild(dbgBtn);
-
   const menu=document.createElement('div');
   menu.id='dbg-menu';
-  menu.style.cssText='position:fixed;top:44px;right:10px;z-index:99998;background:rgba(8,8,18,0.97);border:1px solid #D4A843;border-radius:8px;padding:6px;display:none;flex-direction:column;gap:3px;min-width:148px;';
-
+  menu.style.cssText='position:fixed;top:44px;right:10px;z-index:99998;background:rgba(8,8,18,0.97);border:1px solid #D4A843;border-radius:8px;padding:6px;display:none;flex-direction:column;gap:3px;min-width:148px;max-height:80vh;overflow-y:auto;';
   chapters.forEach(ch=>{
     const b=document.createElement('div');
     b.textContent=ch.label;
@@ -2451,18 +3220,13 @@ window.addEventListener('load',()=>{
     b.onmouseout =()=>b.style.background='rgba(255,255,255,0.05)';
     b.onclick=()=>{
       menu.style.display='none';
-      // Kill FPS overlay
-      const fps=document.getElementById('fps-container');
-      if(fps)fps.remove();
-      // Kill all nav/balance DOM buttons
+      const fps=document.getElementById('fps-container');if(fps)fps.remove();
       document.querySelectorAll('[data-ch3btn],[data-navbtn]').forEach(el=>el.remove());
-      // Stop all active scenes
       game.scene.scenes.forEach(s=>{if(s.scene.isActive()||s.scene.isPaused())s.scene.stop();});
       game.scene.start(ch.key);
     };
     menu.appendChild(b);
   });
-
   document.body.appendChild(menu);
   dbgBtn.onclick=()=>{menu.style.display=menu.style.display==='none'?'flex':'none';};
 });
